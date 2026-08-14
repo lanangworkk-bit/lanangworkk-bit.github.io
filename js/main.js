@@ -87,7 +87,12 @@ portfolio.forEach((item) => {
     <h3>${item.title}</h3>
     <p>${item.description}</p>
     <span class="portfolio-tech">${item.tech}</span>
+    ${item.link ? '<button class="blog-readmore">Lihat Karya →</button>' : ''}
   `;
+  if (item.link) {
+    card.style.cursor = 'pointer';
+    card.addEventListener('click', () => window.open(item.link, '_blank'));
+  }
   portfolioGrid.appendChild(card);
 });
 

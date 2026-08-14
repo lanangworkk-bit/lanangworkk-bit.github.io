@@ -15,13 +15,13 @@ const SITE_CONFIG = {
   logo: "Lannzw", // nama singkat untuk logo di navbar
   tagline: [
     "Mahasiswa Informatika",
-    "Web Developer",
-    "Blogger",
-    "Tech Enthusiast",
+    "Fotografer",
+    "Videografer",
+    "Editor Video",
   ],
   // Deskripsi singkat di halaman depan
   description:
-    "Mahasiswa Informatika Universitas Udayana yang tertarik pada pengembangan web, teknologi, dan berbagi ilmu. Selamat datang di portofolio dan blog pribadi saya.",
+    "Mahasiswa Informatika Universitas Udayana dengan minat besar di bidang seni visual. Aktif sebagai fotografer, videografer, dan editor video di Lebulens Studio. Selamat datang di portofolio dan blog pribadi saya.",
 
   /* ---------- TENTANG ---------- */
   about: {
@@ -29,37 +29,40 @@ const SITE_CONFIG = {
     // Jika dikosongkan (""), maka akan pakai emoji di bawahnya.
     image: "foto.jpg",
     emoji: "👨‍💻",
-    text: "Saya adalah mahasiswa Program Studi Informatika, FMIPA, Universitas Udayana. Saya tertarik menciptakan pengalaman digital yang bersih dan mudah digunakan, serta suka berbagi ilmu melalui tulisan-tulisan di blog ini.",
-    skills: ["HTML", "CSS", "JavaScript", "UI/UX", "React", "Node.js"],
+    text: "Saya adalah mahasiswa Program Studi Informatika, FMIPA, Universitas Udayana yang memiliki minat besar di bidang seni visual, khususnya fotografi dan editing foto. Saya terbiasa menggunakan Adobe Photoshop dan Adobe Lightroom untuk mengolah foto agar menghasilkan karya yang menarik dan berkualitas. Saya senang belajar hal baru, kreatif, bertanggung jawab, dan mampu bekerja secara individu maupun dalam tim.",
+    skills: ["Fotografi", "Videografi", "Photoshop", "Lightroom", "Video Editing", "HTML", "CSS", "JavaScript"],
   },
 
   /* ---------- STATISTIK (menggunakan angka) ---------- */
   stats: [
-    { value: 15, suffix: "+", label: "Proyek Selesai" },
-    { value: 3, suffix: "+", label: "Tahun Pengalaman" },
-    { value: 40, suffix: "+", label: "Artikel Blog" },
-    { value: 500, suffix: "+", label: "Klien Senang" },
+    { value: 3, suffix: "+", label: "Bidang Kreatif" },
+    { value: 2, suffix: "+", label: "Tahun Belajar" },
+    { value: 2, suffix: "+", label: "Software Editing" },
+    { value: 3, suffix: "+", label: "Kegiatan Kampus" },
   ],
 
   /* ---------- PORTOFOLIO ---------- */
   portfolio: [
     {
-      emoji: "💻",
-      title: "Website Toko Online",
-      description: "Website e-commerce dengan keranjang belanja dan pembayaran sederhana.",
-      tech: "HTML · CSS · JS",
+      emoji: "📸",
+      title: "Fotografer",
+      description: "Mengambil foto untuk kebutuhan dokumentasi dan konten, dengan hasil yang menarik dan berkualitas.",
+      tech: "Kamera DSLR · Dokumentasi",
+      link: "https://www.instagram.com/lebulens.studio",
     },
     {
-      emoji: "📝",
-      title: "Aplikasi Catatan",
-      description: "Catatan digital dengan fitur pencarian dan penyimpanan lokal browser.",
-      tech: "JavaScript · LocalStorage",
+      emoji: "🎥",
+      title: "Videografer",
+      description: "Merekam video untuk kebutuhan dokumentasi dan konten dengan komposisi yang rapi dan sinematik.",
+      tech: "Videografi · Dokumentasi",
+      link: "https://www.instagram.com/lebulens.studio",
     },
     {
-      emoji: "📊",
-      title: "Dashboard Admin",
-      description: "Dashboard dengan grafik data dan tampilan yang responsif di semua perangkat.",
-      tech: "React · Chart.js",
+      emoji: "🎨",
+      title: "Editor Video & Foto",
+      description: "Mengedit foto dan video menggunakan Adobe Photoshop, Lightroom, dengan retouching dan color correction.",
+      tech: "Photoshop · Lightroom",
+      link: "https://www.instagram.com/lebulens.studio",
     },
   ],
 
@@ -151,6 +154,7 @@ const SITE_CONFIG = {
     { name: "GitHub", url: "https://github.com/lanangworkk-bit" },
     { name: "LinkedIn", url: "https://www.linkedin.com/in/i-ketut-lanang-subakti-560461420" },
     { name: "Instagram", url: "https://www.instagram.com/lannggzw_" },
+    { name: "Lebulens Studio", url: "https://www.instagram.com/lebulens.studio" },
     { name: "Email", url: "mailto:lanangworkk@gmail.com" },
   ],
 };
