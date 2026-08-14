@@ -140,7 +140,7 @@ const SITE_CONFIG = {
   /* ---------- DOWNLOAD CV ----------
      Simpan file CV kamu (misal CV.pdf) di folder proyek,
      lalu tulis nama filenya di bawah. */
-  cvFile: "CV.pdf",
+  cvFile: "CV_I_Ketut_Lanang_Subakti.pdf",
 
   /* ---------- KONTAK ---------- */
   contact: {
