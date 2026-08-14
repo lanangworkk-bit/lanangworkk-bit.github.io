@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Portofolio dan blog pribadi saya - pengembangan web, teknologi, dan pengalaman pribadi.">
+  <meta name="author" content="Nama Kamu">
+  <meta property="og:title" content="Portofolio Blog Saya">
+  <meta property="og:description" content="Portofolio dan blog pribadi saya - pengembangan web, teknologi, dan pengalaman pribadi.">
+  <title>Portofolio Blog Saya</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💻</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Preloader -->
+  <div class="preloader" id="preloader">
+    <div class="loader-ring"></div>
+    <p>Memuat...</p>
+  </div>
+
+  <header class="navbar" id="navbar">
+    <div class="container nav-inner">
+      <a href="#hero" class="logo" id="logo">Nama<span class="logo-accent">Saya</span></a>
+      <nav class="nav-menu" id="navMenu">
+        <a href="#hero" class="nav-link active">Beranda</a>
+        <a href="#about" class="nav-link">Tentang</a>
+        <a href="#portfolio" class="nav-link">Portofolio</a>
+        <a href="#blog" class="nav-link">Blog</a>
+        <a href="#contact" class="nav-link">Kontak</a>
+      </nav>
+      <div class="nav-actions">
+        <button class="theme-toggle" id="themeToggle" aria-label="Ganti tema">
+          <span class="theme-icon-sun">☀️</span>
+          <span class="theme-icon-moon">🌙</span>
+        </button>
+        <button class="hamburger" id="hamburger" aria-label="Buka menu">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- Hero -->
+    <section id="hero" class="hero">
+      <div class="container hero-inner">
+        <div class="hero-text">
+          <p class="hero-greeting">Halo, saya</p>
+          <h1 class="hero-title" id="heroName">Nama Kamu</h1>
+          <h2 class="hero-subtitle" id="typedText"></h2>
+          <p class="hero-desc" id="heroDesc"></p>
+          <div class="hero-actions">
+            <a href="#portfolio" class="btn btn-primary">Lihat Portofolio</a>
+            <a href="#contact" class="btn btn-outline">Hubungi Saya</a>
+            <a href="#" class="btn btn-white" id="cvButton">Download CV ⬇</a>
+          </div>
+        </div>
+        <div class="hero-art">
+          <div class="blob"></div>
+          <div class="card-float card-float-1">💻 Web Developer</div>
+          <div class="card-float card-float-2">📝 Blogger</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tentang -->
+    <section id="about" class="about">
+      <div class="container">
+        <div class="section-head reveal">
+          <p class="section-tag">Tentang Saya</p>
+          <h2 class="section-title">Siapa Saya</h2>
+        </div>
+        <div class="about-grid">
+          <div class="about-photo reveal">
+            <div class="photo-frame" id="aboutPhoto">👨‍💻</div>
+          </div>
+          <div class="about-text reveal">
+            <p id="aboutText"></p>
+            <div class="skills" id="skillsList"></div>
+            <div class="about-contact">
+              <p>📧 <a id="aboutEmail" href="mailto:email@contoh.com">email@contoh.com</a></p>
+              <p>📞 <span id="aboutPhone">+62 812 3456 7890</span></p>
+            </div>
+            <a href="#" class="btn btn-primary" id="cvButton2">Download CV ⬇</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Statistik -->
+    <section class="stats" id="stats">
+      <div class="container stats-grid" id="statsGrid"></div>
+    </section>
+
+    <!-- Portofolio -->
+    <section id="portfolio" class="portfolio">
+      <div class="container">
+        <div class="section-head reveal">
+          <p class="section-tag">Portofolio</p>
+          <h2 class="section-title">Karya Pilihan</h2>
+        </div>
+        <div class="portfolio-grid" id="portfolioGrid"></div>
+      </div>
+    </section>
+
+    <!-- Blog -->
+    <section id="blog" class="blog">
+      <div class="container">
+        <div class="section-head reveal">
+          <p class="section-tag">Blog</p>
+          <h2 class="section-title">Tulisan Terbaru</h2>
+        </div>
+        <div class="blog-filters reveal" id="blogFilters">
+          <button class="filter-btn active" data-filter="Semua">Semua</button>
+        </div>
+        <div class="blog-search reveal">
+          <input type="text" id="searchInput" placeholder="Cari artikel...">
+        </div>
+        <div class="blog-list" id="blogList"></div>
+        <p class="blog-empty" id="blogEmpty">Belum ada artikel yang cocok.</p>
+      </div>
+    </section>
+
+    <!-- Kontak -->
+    <section id="contact" class="contact">
+      <div class="container">
+        <div class="section-head reveal">
+          <p class="section-tag">Kontak</p>
+          <h2 class="section-title">Mari Bicara</h2>
+        </div>
+        <form id="contactForm" class="contact-form reveal">
+          <div class="form-group">
+            <label for="name">Nama</label>
+            <input type="text" id="name" name="name" placeholder="Nama lengkap" required>
+          </div>
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" placeholder="email@contoh.com" required>
+          </div>
+          <div class="form-group">
+            <label for="message">Pesan</label>
+            <textarea id="message" name="message" rows="5" placeholder="Tulis pesan Anda di sini..." required></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary">Kirim Pesan</button>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <p>© <span id="year"></span> Nama Saya. Dibuat dengan ♥ di Indonesia.</p>
+      <div class="socials" id="socialLinks"></div>
+    </div>
+  </footer>
+
+  <!-- Tombol kembali ke atas -->
+  <button class="back-to-top" id="backToTop" aria-label="Kembali ke atas">↑</button>
+
+  <!-- Modal detail artikel -->
+  <div class="modal" id="articleModal">
+    <div class="modal-content">
+      <button class="modal-close" id="modalClose" aria-label="Tutup">×</button>
+      <div class="modal-body" id="modalBody"></div>
+    </div>
+  </div>
+
+  <!-- Notifikasi -->
+  <div class="toast" id="toast"></div>
+
+  <script src="js/data.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
