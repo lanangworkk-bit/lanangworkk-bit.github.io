@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>VOLINK — Connecting People, Creating Impact</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💚</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+
+<div class="app" id="app">
+
+  <!-- ========== SPLASH / WELCOME ========== -->
+  <div class="screen active" id="screen-splash">
+    <div class="splash">
+      <div class="splash-logo">
+        <svg viewBox="0 0 120 120" width="100" height="100" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:#16A34A"/>
+              <stop offset="100%" style="stop-color:#0F766E"/>
+            </linearGradient>
+          </defs>
+          <circle cx="60" cy="60" r="56" fill="url(#logoGrad)"/>
+          <g transform="translate(22,20)" fill="white">
+            <circle cx="24" cy="10" r="8" fill="white"/>
+            <circle cx="54" cy="10" r="8" fill="white"/>
+            <path d="M12,38 Q24,22 36,38" stroke="white" stroke-width="4" fill="none" stroke-linecap="round"/>
+            <path d="M42,38 Q54,22 66,38" stroke="white" stroke-width="4" fill="none" stroke-linecap="round"/>
+            <ellipse cx="39" cy="26" rx="10" ry="4" fill="#FBBF24" opacity="0.9"/>
+            <circle cx="24" cy="68" r="7" fill="white"/>
+            <circle cx="54" cy="68" r="7" fill="white"/>
+            <path d="M16,56 Q24,44 32,56" stroke="white" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+            <path d="M46,56 Q54,44 62,56" stroke="white" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+            <ellipse cx="39" cy="48" rx="8" ry="3" fill="#FBBF24" opacity="0.8"/>
+          </g>
+        </svg>
+      </div>
+      <div class="splash-title">VOLINK</div>
+      <div class="splash-tagline">Connecting People, Creating Impact</div>
+      <div class="splash-dots">
+        <span class="dot active"></span><span class="dot"></span><span class="dot"></span>
+      </div>
+      <button class="btn-primary-lg splash-btn" onclick="goToLogin()">Mulai Sekarang</button>
+      <button class="btn-text splash-skip" onclick="skipToApp()">Lewati →</button>
+    </div>
+  </div>
+
+  <!-- ========== LOGIN / SIGN UP ========== -->
+  <div class="screen" id="screen-login">
+    <div class="login-screen">
+      <div class="login-header">
+        <div class="login-logo-sm">
+          <svg viewBox="0 0 120 120" width="48" height="48" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="60" cy="60" r="56" fill="url(#logoGrad)"/>
+            <g transform="translate(22,20)" fill="white">
+              <circle cx="24" cy="10" r="8" fill="white"/><circle cx="54" cy="10" r="8" fill="white"/>
+              <path d="M12,38 Q24,22 36,38" stroke="white" stroke-width="4" fill="none" stroke-linecap="round"/>
+              <path d="M42,38 Q54,22 66,38" stroke="white" stroke-width="4" fill="none" stroke-linecap="round"/>
+              <ellipse cx="39" cy="26" rx="10" ry="4" fill="#FBBF24" opacity="0.9"/>
+            </g>
+          </svg>
+        </div>
+        <h1>Selamat Datang di VOLINK</h1>
+        <p>Mulai perjalanan dampakmu</p>
+      </div>
+      <div class="login-form">
+        <div class="form-group">
+          <label class="form-label">Nama Lengkap</label>
+          <input type="text" class="form-input" id="loginName" placeholder="Masukkan nama kamu" value="Raka">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input type="email" class="form-input" id="loginEmail" placeholder="email@contoh.com" value="raka@univ.ac.id">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Kata Sandi</label>
+          <div class="form-input-wrap">
+            <input type="password" class="form-input" id="loginPass" placeholder="Minimal 8 karakter" value="password123">
+            <button class="input-eye" onclick="togglePass()">👁</button>
+          </div>
+        </div>
+        <button class="btn-primary-lg" onclick="doLogin()" style="margin-top:8px">Masuk</button>
+        <div class="login-divider"><span>atau</span></div>
+        <button class="btn-outline-full" onclick="doLogin()">
+          <span> Continue with Google</span>
+        </button>
+        <p class="login-footer-text">Belum punya akun? <a href="#" onclick="doLogin();return false;">Daftar</a></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== ONBOARDING STEP 1: Pilihan Minat ========== -->
+  <div class="screen" id="screen-onboarding">
+    <div class="onboarding">
+      <div class="onboarding-header">
+        <div class="ob-logo">
+          <svg viewBox="0 0 120 120" width="36" height="36" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="60" cy="60" r="56" fill="url(#logoGrad)"/>
+            <g transform="translate(22,20)" fill="white">
+              <circle cx="24" cy="10" r="8" fill="white"/><circle cx="54" cy="10" r="8" fill="white"/>
+              <path d="M12,38 Q24,22 36,38" stroke="white" stroke-width="4" fill="none" stroke-linecap="round"/>
+              <path d="M42,38 Q54,22 66,38" stroke="white" stroke-width="4" fill="none" stroke-linecap="round"/>
+              <ellipse cx="39" cy="26" rx="10" ry="4" fill="#FBBF24" opacity="0.9"/>
+            </g>
+          </svg>
+        </div>
+        <h2 id="obTitle">Pilihan Minat</h2>
+        <p id="obSubtitle">Bidang sosial apa yang paling ingin kamu dukung?</p>
+      </div>
+      <div class="onboarding-progress">
+        <div class="progress-bar"><div class="progress-fill" id="obProgress" style="width:16.6%"></div></div>
+        <div class="progress-labels">
+          <span id="obStepLabel">Langkah 1 dari 6</span>
+          <span id="obPercent">17%</span>
+        </div>
+      </div>
+      <div class="onboarding-body" id="obBody"></div>
+      <div class="onboarding-footer">
+        <button class="btn-ghost" id="obBack" onclick="obBack()" style="display:none">Kembali</button>
+        <button class="btn-primary-lg" id="obNext" onclick="obNext()" disabled>Lanjut →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== IMPACT DNA RESULT ========== -->
+  <div class="screen" id="screen-dna">
+    <div class="dna-screen">
+      <div class="dna-confetti" id="dnaConfetti"></div>
+      <div class="dna-icon">
+        <svg viewBox="0 0 120 120" width="80" height="80" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="60" cy="60" r="56" fill="url(#logoGrad)"/>
+          <g transform="translate(22,20)" fill="white">
+            <circle cx="24" cy="10" r="8" fill="white"/><circle cx="54" cy="10" r="8" fill="white"/>
+            <path d="M12,38 Q24,22 36,38" stroke="white" stroke-width="4" fill="none" stroke-linecap="round"/>
+            <path d="M42,38 Q54,22 66,38" stroke="white" stroke-width="4" fill="none" stroke-linecap="round"/>
+            <ellipse cx="39" cy="26" rx="10" ry="4" fill="#FBBF24" opacity="0.9"/>
+          </g>
+        </svg>
+      </div>
+      <div class="dna-badge">🧬 Impact DNA</div>
+      <div class="dna-title">Impact DNA Kamu</div>
+      <div class="dna-subtitle">Profil kontribusimu telah terbentuk</div>
+      <div class="dna-card">
+        <div class="dna-card-label">Profil Kamu</div>
+        <div class="dna-profile-name" id="dnaName">Community Changemaker</div>
+        <div class="dna-radar" id="dnaRadar"></div>
+        <div class="dna-bars" id="dnaBars"></div>
+        <div class="dna-skills-title">Keahlian Kamu</div>
+        <div class="dna-skills" id="dnaSkills"></div>
+      </div>
+      <button class="btn-primary-lg" onclick="goToDashboard()">Lihat Rekomendasi →</button>
+    </div>
+  </div>
+
+  <!-- ========== PERSONALIZED DASHBOARD ========== -->
+  <div class="screen" id="screen-home">
+    <div class="home-screen">
+      <div class="home-header">
+        <div class="home-header-top">
+          <div>
+            <div class="home-greeting" id="homeGreeting">Siap menciptakan dampak hari ini?</div>
+            <div class="home-name">Hi, <span id="homeName">Raka</span>! 👋</div>
+          </div>
+          <div class="home-avatar" onclick="showScreen('profile')">
+            <span>🧑</span>
+          </div>
+        </div>
+        <div class="home-search">
+          <span class="search-icon">🔍</span>
+          <input type="text" placeholder="Cari kegiatan atau komunitas..." id="homeSearch" oninput="filterHome()">
+        </div>
+      </div>
+
+      <div class="home-content">
+        <div class="home-section">
+          <div class="home-section-header">
+            <h3>Browse Berdasarkan Minat</h3>
+          </div>
+          <div class="cause-pills" id="causePills"></div>
+        </div>
+
+        <div class="home-section">
+          <div class="home-section-header">
+            <h3>Rekomendasi untukmu</h3>
+            <a href="#" class="see-all" onclick="showScreen('explore');return false;">Lihat Semua</a>
+          </div>
+          <div id="homeRecommendations"></div>
+        </div>
+
+        <div class="home-section">
+          <div class="home-section-header">
+            <h3>Impact Saya</h3>
+            <a href="#" class="see-all" onclick="showScreen('impact');return false;">Detail →</a>
+          </div>
+          <div class="impact-summary-card">
+            <div class="impact-summary-grid">
+              <div class="impact-stat-item">
+                <div class="impact-stat-num" id="homeHours">24</div>
+                <div class="impact-stat-label">Jam Volunteer</div>
+              </div>
+              <div class="impact-stat-item">
+                <div class="impact-stat-num" id="homeActivities">6</div>
+                <div class="impact-stat-label">Kegiatan</div>
+              </div>
+              <div class="impact-stat-item">
+                <div class="impact-stat-num" id="homePeople">128</div>
+                <div class="impact-stat-label">Orang Terbantu</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== EXPLORE ========== -->
+  <div class="screen" id="screen-explore">
+    <div class="explore-screen">
+      <div class="explore-header">
+        <h2>Explore</h2>
+        <p>Temukan kegiatan yang cocok untukmu</p>
+      </div>
+      <div class="explore-search">
+        <span class="search-icon">🔍</span>
+        <input type="text" placeholder="Cari kegiatan..." id="exploreSearch" oninput="filterExplore()">
+      </div>
+      <div class="explore-filters" id="exploreFilters"></div>
+      <div class="explore-list" id="exploreList"></div>
+    </div>
+  </div>
+
+  <!-- ========== OPPORTUNITY DETAIL ========== -->
+  <div class="screen" id="screen-detail">
+    <div class="detail-screen">
+      <div class="detail-hero" id="detailHero"></div>
+      <button class="detail-back" onclick="goBack()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <div class="detail-content">
+        <div class="detail-tags" id="detailTags"></div>
+        <h1 class="detail-title" id="detailTitle"></h1>
+        <div class="detail-community" id="detailCommunity"></div>
+
+        <div class="detail-info-grid" id="detailInfo"></div>
+
+        <div class="detail-section">
+          <h3>Deskripsi</h3>
+          <p class="detail-desc" id="detailDesc"></p>
+        </div>
+
+        <div class="detail-section">
+          <h3>Kuota Volunteer</h3>
+          <div class="detail-slots" id="detailSlots"></div>
+        </div>
+
+        <div class="detail-section">
+          <h3>Target Dampak</h3>
+          <div class="impact-targets" id="detailImpact"></div>
+        </div>
+
+        <div class="detail-section">
+          <h3>Skill yang Dibutuhkan</h3>
+          <p class="detail-desc" id="detailSkills"></p>
+        </div>
+
+        <div class="detail-section" id="detailMatchSection">
+          <div class="match-card" id="detailMatch"></div>
+        </div>
+
+        <div class="detail-section" id="detailVerificationSection">
+          <div class="verification-card" id="detailVerification"></div>
+        </div>
+
+        <div class="detail-cta">
+          <button class="btn-primary-lg" onclick="showScreen('confirm')">Saya Ingin Bergabung →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== JOIN CONFIRMATION ========== -->
+  <div class="screen" id="screen-confirm">
+    <div class="confirm-screen">
+      <button class="detail-back" onclick="goBack()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <div class="confirm-content">
+        <div class="confirm-icon">✋</div>
+        <h2>Konfirmasi Bergabung</h2>
+        <p class="confirm-sub">Pastikan kamu sudah memahami detail kegiatan</p>
+        <div class="confirm-activity-brief" id="confirmBrief"></div>
+        <div class="confirm-checklist">
+          <label class="confirm-check" id="check1">
+            <input type="checkbox" onchange="updateConfirm()">
+            <span class="checkmark">✓</span>
+            <span>Saya memahami detail kegiatan</span>
+          </label>
+          <label class="confirm-check" id="check2">
+            <input type="checkbox" onchange="updateConfirm()">
+            <span class="checkmark">✓</span>
+            <span>Saya siap hadir dan berkontribusi</span>
+          </label>
+          <label class="confirm-check" id="check3">
+            <input type="checkbox" onchange="updateConfirm()">
+            <span class="checkmark">✓</span>
+            <span>Saya setuju dengan kebijakan komunitas</span>
+          </label>
+        </div>
+        <button class="btn-primary-lg" id="confirmBtn" onclick="confirmJoin()" disabled>Ya, Saya Bergabung!</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== JOIN SUCCESS ========== -->
+  <div class="screen" id="screen-success">
+    <div class="success-screen">
+      <div class="success-icon">🎉</div>
+      <h2>Yay! Kamu berhasil bergabung!</h2>
+      <p class="success-sub">Kamu akan mendapat notifikasi pengingat sebelum kegiatan dimulai.</p>
+      <div class="success-tips">
+        <div class="success-tip">
+          <span class="tip-icon">📱</span>
+          <span>Simpan QR Check-in di menu Aktivitas</span>
+        </div>
+        <div class="success-tip">
+          <span class="tip-icon">📍</span>
+          <span>Cek lokasi dan waktu kegiatan</span>
+        </div>
+        <div class="success-tip">
+          <span class="tip-icon">🎒</span>
+          <span>Persiapkan perlengkapan yang diperlukan</span>
+        </div>
+      </div>
+      <button class="btn-primary-lg" onclick="showScreen('activities')">Lihat Aktivitas Saya →</button>
+      <button class="btn-ghost" onclick="showScreen('home')" style="margin-top:12px">Kembali ke Beranda</button>
+    </div>
+  </div>
+
+  <!-- ========== MY ACTIVITIES ========== -->
+  <div class="screen" id="screen-activities">
+    <div class="activities-screen">
+      <div class="activities-header">
+        <h2>Aktivitas Saya</h2>
+        <p>Kegiatan yang sudah dan akan kamu ikuti</p>
+      </div>
+      <div class="activities-tabs">
+        <button class="tab-pill active" onclick="switchActivityTab('upcoming', this)">Akan Datang</button>
+        <button class="tab-pill" onclick="switchActivityTab('completed', this)">Selesai</button>
+      </div>
+      <div id="activitiesUpcoming"></div>
+      <div id="activitiesCompleted" style="display:none"></div>
+    </div>
+  </div>
+
+  <!-- ========== QR CHECK-IN ========== -->
+  <div class="screen" id="screen-checkin">
+    <div class="checkin-screen">
+      <button class="detail-back" onclick="goBack()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <h2>Check-in Kegiatan</h2>
+      <p class="checkin-sub">Tunjukkan QR ini ke panitia saat tiba di lokasi.</p>
+      <div class="checkin-qr-container">
+        <div class="checkin-qr" id="checkinQR">
+          <div class="qr-pattern">
+            <div class="qr-grid" id="qrGrid"></div>
+          </div>
+          <div class="checkin-scan-line"></div>
+        </div>
+      </div>
+      <div class="checkin-info" id="checkinInfo"></div>
+      <div class="checkin-status" id="checkinStatus">
+        <span class="status-dot"></span>
+        Menunggu check-in...
+      </div>
+      <button class="btn-primary-lg" onclick="doCheckin()" id="checkinBtn">Simulasikan Check-in ✓</button>
+    </div>
+  </div>
+
+  <!-- ========== ACTIVITY COMPLETE ========== -->
+  <div class="screen" id="screen-completion">
+    <div class="completion-screen">
+      <div class="completion-celebration">💚</div>
+      <h2>Great job, <span id="completionName">Raka</span>! 💚</h2>
+      <p class="completion-sub">Kontribusimu telah tercatat dalam Impact Passport</p>
+      <div class="completion-stats" id="completionStats"></div>
+      <div class="completion-message">
+        <span class="msg-icon">🌟</span>
+        <p id="completionMessage">Setiap kontribusimu menciptakan dampak nyata. Terima kasih!</p>
+      </div>
+      <button class="btn-primary-lg" onclick="showScreen('passport')">Lihat Impact Passport →</button>
+      <button class="btn-ghost" onclick="showScreen('next-recommendation')" style="margin-top:12px">Lihat Rekomendasi Berikutnya</button>
+    </div>
+  </div>
+
+  <!-- ========== IMPACT PASSPORT ========== -->
+  <div class="screen" id="screen-passport">
+    <div class="passport-screen">
+      <div class="passport-header">
+        <div class="passport-avatar" id="passportAvatar">🧑</div>
+        <div class="passport-name" id="passportName">Raka's Impact</div>
+        <div class="passport-label">Impact Passport</div>
+        <div class="passport-dna-badge" id="passportDNA"></div>
+      </div>
+      <div class="passport-stats">
+        <div class="passport-stat">
+          <div class="passport-stat-icon">⏱️</div>
+          <div class="passport-stat-num" id="passportHours">24</div>
+          <div class="passport-stat-label">Jam Volunteer</div>
+        </div>
+        <div class="passport-stat">
+          <div class="passport-stat-icon">📋</div>
+          <div class="passport-stat-num" id="passportActivities">6</div>
+          <div class="passport-stat-label">Kegiatan</div>
+        </div>
+        <div class="passport-stat">
+          <div class="passport-stat-icon">💚</div>
+          <div class="passport-stat-num" id="passportPeople">128</div>
+          <div class="passport-stat-label">Orang Terbantu</div>
+        </div>
+      </div>
+      <div class="passport-section">
+        <h3>Riwayat Kontribusi</h3>
+        <div id="passportHistory"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== IMPACT STATISTICS ========== -->
+  <div class="screen" id="screen-impact">
+    <div class="impact-screen">
+      <div class="impact-header">
+        <h2>Impact Statistics</h2>
+        <p>Dampak kontribusimu secara menyeluruh</p>
+      </div>
+      <div class="impact-overview">
+        <div class="impact-overview-stat">
+          <div class="impact-overview-num" id="impactTotalHours">24</div>
+          <div class="impact-overview-label">Total Jam Volunteer</div>
+        </div>
+        <div class="impact-overview-stat">
+          <div class="impact-overview-num" id="impactTotalPeople">128</div>
+          <div class="impact-overview-label">Orang Terbantu</div>
+        </div>
+      </div>
+      <div class="impact-section">
+        <h3>Kontribusi per Kategori</h3>
+        <div id="impactCategoryChart"></div>
+      </div>
+      <div class="impact-section">
+        <h3>Aktivitas Bulanan</h3>
+        <div id="impactMonthlyChart"></div>
+      </div>
+      <div class="impact-section">
+        <h3>Dampak Terukur</h3>
+        <div id="impactMetrics"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== NEXT RECOMMENDATION ========== -->
+  <div class="screen" id="screen-next-recommendation">
+    <div class="next-rec-screen">
+      <div class="next-rec-header">
+        <div class="next-rec-icon">🎯</div>
+        <h2>Rekomendasi Berikutnya</h2>
+        <p>Berdasarkan perjalanan kontribusimu, kami menemukan lebih banyak kegiatan yang cocok untukmu.</p>
+      </div>
+      <div id="nextRecList"></div>
+      <button class="btn-primary-lg" onclick="showScreen('home')" style="margin-top:20px">Kembali ke Beranda</button>
+    </div>
+  </div>
+
+  <!-- ========== PROFILE ========== -->
+  <div class="screen" id="screen-profile">
+    <div class="profile-screen">
+      <div class="profile-header">
+        <div class="profile-avatar">🧑</div>
+        <h2 id="profileName">Raka</h2>
+        <div class="profile-dna" id="profileDNA"></div>
+      </div>
+      <div class="profile-section">
+        <h3>Minat</h3>
+        <div class="profile-tags" id="profileCauses"></div>
+      </div>
+      <div class="profile-section">
+        <h3>Keahlian</h3>
+        <div class="profile-tags" id="profileSkills"></div>
+      </div>
+      <div class="profile-section">
+        <h3>Ketersediaan</h3>
+        <div class="profile-availability" id="profileAvailability"></div>
+      </div>
+      <div class="profile-section">
+        <h3>Impact Passport</h3>
+        <div class="profile-passport-mini">
+          <span>24 jam</span> · <span>6 kegiatan</span> · <span>128 orang terbantu</span>
+        </div>
+        <button class="btn-ghost" onclick="showScreen('passport')" style="width:100%;margin-top:8px">Lihat Passport →</button>
+      </div>
+      <div class="profile-section">
+        <h3>Pengaturan</h3>
+        <div class="profile-settings">
+          <div class="settings-item"><span>Notifikasi</span><div class="toggle-switch active" onclick="this.classList.toggle('active')"><div class="toggle-knob"></div></div></div>
+          <div class="settings-item"><span>Lokasi</span><div class="toggle-switch active" onclick="this.classList.toggle('active')"><div class="toggle-knob"></div></div></div>
+          <div class="settings-item"><span>Bahasa</span><span class="settings-value">Indonesia</span></div>
+        </div>
+      </div>
+      <button class="btn-ghost" onclick="resetApp()" style="width:100%;color:#EF4444;border-color:#FEE2E2">Keluar</button>
+    </div>
+  </div>
+
+  <!-- ========== BOTTOM NAVIGATION ========== -->
+  <div class="bottom-nav" id="bottomNav" style="display:none">
+    <button class="nav-item active" data-screen="home" onclick="tabTo('home')">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>Home</span>
+    </button>
+    <button class="nav-item" data-screen="explore" onclick="tabTo('explore')">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <span>Explore</span>
+    </button>
+    <button class="nav-item" data-screen="activities" onclick="tabTo('activities')">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <span>Aktivitas</span>
+    </button>
+    <button class="nav-item" data-screen="impact" onclick="tabTo('impact')">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      <span>Impact</span>
+    </button>
+    <button class="nav-item" data-screen="profile" onclick="tabTo('profile')">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span>Profil</span>
+    </button>
+  </div>
+
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

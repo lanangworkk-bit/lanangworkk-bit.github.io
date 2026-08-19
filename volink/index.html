@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="VOLINK — Impact-matching platform yang menghubungkan volunteer dengan komunitas sosial.">
+  <title>VOLINK — Connecting People, Creating Impact</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💚</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/landing.css">
+</head>
+<body>
+
+  <div class="preloader" id="preloader">
+    <div class="loader-ring"></div>
+    <p>Memuat...</p>
+  </div>
+
+  <header class="navbar" id="navbar">
+    <div class="nav-inner">
+      <a href="#" class="logo">
+        <svg viewBox="0 0 120 120" width="32" height="32" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:#16A34A"/>
+              <stop offset="100%" style="stop-color:#0F766E"/>
+            </linearGradient>
+          </defs>
+          <circle cx="60" cy="60" r="56" fill="url(#logoGrad)"/>
+          <g transform="translate(22,20)" fill="white">
+            <circle cx="24" cy="10" r="8" fill="white"/><circle cx="54" cy="10" r="8" fill="white"/>
+            <path d="M12,38 Q24,22 36,38" stroke="white" stroke-width="4" fill="none" stroke-linecap="round"/>
+            <path d="M42,38 Q54,22 66,38" stroke="white" stroke-width="4" fill="none" stroke-linecap="round"/>
+            <ellipse cx="39" cy="26" rx="10" ry="4" fill="#FBBF24" opacity="0.9"/>
+          </g>
+        </svg>
+        VOLINK
+      </a>
+      <nav class="nav-links" id="navLinks">
+        <a href="#problem" class="nav-link">Masalah</a>
+        <a href="#solution" class="nav-link">Solusi</a>
+        <a href="#features" class="nav-link">Fitur</a>
+        <a href="#journey" class="nav-link">Perjalanan</a>
+      </nav>
+      <div class="nav-actions">
+        <button class="theme-toggle" id="themeToggle" aria-label="Ganti tema">
+          <span class="theme-icon-sun">☀️</span>
+          <span class="theme-icon-moon">🌙</span>
+        </button>
+        <a href="app.html" class="btn-demo">Coba Prototype</a>
+        <button class="hamburger" id="hamburger" aria-label="Menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- Hero -->
+    <section class="hero" id="hero">
+      <div class="container hero-inner">
+        <div class="hero-text">
+          <div class="hero-badge">🌟 UI/UX Competition Entry</div>
+          <h1 class="hero-title">
+            Connecting People,<br>
+            <span class="highlight">Creating Impact</span>
+          </h1>
+          <p class="hero-desc">
+            VOLINK adalah impact-matching platform yang membantu setiap orang menemukan tempat di mana kontribusinya paling berarti.
+          </p>
+          <div class="hero-actions">
+            <a href="app.html" class="btn btn-primary">Coba Prototype →</a>
+            <a href="#problem" class="btn btn-outline">Pelajari Lebih Lanjut</a>
+          </div>
+        </div>
+        <div class="hero-visual">
+          <div class="hero-phone">
+            <div class="hero-phone-screen">
+              <svg viewBox="0 0 120 120" width="60" height="60" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <linearGradient id="logoGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#16A34A"/>
+                    <stop offset="100%" style="stop-color:#0F766E"/>
+                  </linearGradient>
+                </defs>
+                <circle cx="60" cy="60" r="56" fill="url(#logoGrad2)"/>
+                <g transform="translate(22,20)" fill="white">
+                  <circle cx="24" cy="10" r="8" fill="white"/><circle cx="54" cy="10" r="8" fill="white"/>
+                  <path d="M12,38 Q24,22 36,38" stroke="white" stroke-width="4" fill="none" stroke-linecap="round"/>
+                  <path d="M42,38 Q54,22 66,38" stroke="white" stroke-width="4" fill="none" stroke-linecap="round"/>
+                  <ellipse cx="39" cy="26" rx="10" ry="4" fill="#FBBF24" opacity="0.9"/>
+                </g>
+              </svg>
+              <div class="hero-phone-title">VOLINK</div>
+              <div class="hero-phone-sub">Connecting People, Creating Impact</div>
+            </div>
+          </div>
+          <div class="floating-card fc-1">
+            <span class="fc-icon">🌿</span>
+            <div><strong>94% Impact Fit</strong><br><small style="color:var(--gray-400)">Bersih Pantai Sanur</small></div>
+          </div>
+          <div class="floating-card fc-2">
+            <span class="fc-icon">📚</span>
+            <div><strong>87% Impact Fit</strong><br><small style="color:var(--gray-400)">Mengajar Anak Pesisir</small></div>
+          </div>
+          <div class="floating-card fc-3">
+            <span class="fc-icon">🎯</span>
+            <div><strong>Impact DNA</strong><br><small style="color:var(--gray-400)">Profile kontribusi</small></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Problem -->
+    <section class="section problem" id="problem">
+      <div class="container">
+        <div class="section-head reveal">
+          <p class="section-tag">Masalah</p>
+          <h2 class="section-title">Kenapa VOLINK Dibutuhkan?</h2>
+          <p class="section-desc">Banyak orang ingin membantu, banyak komunitas membutuhkan bantuan. Tapi mereka tidak saling menemukan.</p>
+        </div>
+        <div class="problem-grid reveal">
+          <div class="problem-content">
+            <h3>"Saya harus mulai dari mana?"</h3>
+            <p>Banyak orang memiliki keinginan untuk berkontribusi, tetapi keinginan tersebut sering berhenti pada tahap niat.</p>
+            <div class="problem-quote">
+              "Apakah kegiatannya sesuai dengan skill saya? Apakah waktunya cocok? Apakah lokasinya terlalu jauh?"
+            </div>
+            <div class="problem-quote">
+              "Apakah saya memang dibutuhkan? Apakah komunitasnya dapat dipercaya?"
+            </div>
+          </div>
+          <div class="problem-visual">
+            <div class="problem-card">
+              <div class="problem-card-icon red">🔍</div>
+              <div>
+                <h4>Tidak Tahu Mulai dari Mana</h4>
+                <p>Tidak ada cara mudah menemukan kegiatan yang benar-benar sesuai.</p>
+              </div>
+            </div>
+            <div class="problem-card">
+              <div class="problem-card-icon amber">⏰</div>
+              <div>
+                <h4>Keterbatasan Waktu & Lokasi</h4>
+                <p>Kegiatan yang ditemukan sering tidak cocok dengan jadwal atau lokasi.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="mismatch-bar reveal">
+          <h3>Yang Terjadi: Mismatch</h3>
+          <div class="mismatch-visual">
+            <div class="mismatch-side mismatch-people">🧑 Ingin Membantu</div>
+            <div class="mismatch-x">✕</div>
+            <div class="mismatch-side mismatch-communities">🏘️ Butuh Bantuan</div>
+          </div>
+          <div style="margin-top:20px">
+            <div class="mismatch-volink">💚 VOLINK Menjembatani</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Solution -->
+    <section class="section solution" id="solution">
+      <div class="container">
+        <div class="section-head reveal">
+          <p class="section-tag">Solusi</p>
+          <h2 class="section-title">Cara VOLINK Bekerja</h2>
+          <p class="section-desc">Dari "cari kegiatan" menjadi "temukan kecocokanmu".</p>
+        </div>
+        <div class="solution-flow reveal">
+          <div class="solution-step">
+            <div class="solution-step-icon step-green">🧭</div>
+            <div class="solution-step-label">Kenali Diri</div>
+          </div>
+          <div class="solution-arrow">→</div>
+          <div class="solution-step">
+            <div class="solution-step-icon step-blue">🧬</div>
+            <div class="solution-step-label">Impact DNA</div>
+          </div>
+          <div class="solution-arrow">→</div>
+          <div class="solution-step">
+            <div class="solution-step-icon step-amber">🎯</div>
+            <div class="solution-step-label">Smart Match</div>
+          </div>
+          <div class="solution-arrow">→</div>
+          <div class="solution-step">
+            <div class="solution-step-icon step-purple">🌍</div>
+            <div class="solution-step-label">Lihat Dampak</div>
+          </div>
+        </div>
+        <div class="solution-features">
+          <div class="sol-card reveal">
+            <div class="sol-card-icon" style="background:rgba(16,185,129,0.1)">🔍</div>
+            <h3>Discover</h3>
+            <p>Menemukan kegiatan dan komunitas sosial yang sesuai dengan profil kontribusimu.</p>
+          </div>
+          <div class="sol-card reveal">
+            <div class="sol-card-icon" style="background:rgba(59,130,246,0.1)">🎯</div>
+            <h3>Match</h3>
+            <p>Sistem menentukan kegiatan yang paling sesuai berdasarkan Impact DNA kamu.</p>
+          </div>
+          <div class="sol-card reveal">
+            <div class="sol-card-icon" style="background:rgba(245,158,11,0.1)">✨</div>
+            <h3>Impact</h3>
+            <p>Mencatat dan memperlihatkan dampak nyata dari kontribusimu.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="section how" id="how">
+      <div class="container">
+        <div class="section-head reveal">
+          <p class="section-tag">Cara Kerja</p>
+          <h2 class="section-title">3 Tahap Sederhana</h2>
+        </div>
+        <div class="how-steps">
+          <div class="how-step reveal">
+            <div class="how-step-num">1</div>
+            <h3>Personal Onboarding</h3>
+            <p>Isi minat, skill, waktu, dan lokasi kamu. Sistem memahami karakter kontribusimu.</p>
+          </div>
+          <div class="how-step reveal">
+            <div class="how-step-num">2</div>
+            <h3>Impact DNA & Matching</h3>
+            <p>Profilmu menjadi Impact DNA. Sistem merekomendasikan kegiatan dengan Impact Fit Score.</p>
+          </div>
+          <div class="how-step reveal">
+            <div class="how-step-num">3</div>
+            <h3>Contribute & Track</h3>
+            <p>Bergabung, berkontribusi, dan lihat dampakmu tercatat di Impact Passport.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features -->
+    <section class="section features" id="features">
+      <div class="container">
+        <div class="section-head reveal">
+          <p class="section-tag">Fitur Utama</p>
+          <h2 class="section-title">5 Fitur yang Membuat VOLINK Berbeda</h2>
+        </div>
+        <div class="features-grid">
+          <div class="feature-card reveal">
+            <div class="feature-icon" style="background:rgba(16,185,129,0.1)">🧬</div>
+            <h3>Impact DNA</h3>
+            <p>Mengenali minat, kemampuan, dan pola kontribusi kamu secara personal.</p>
+          </div>
+          <div class="feature-card reveal">
+            <div class="feature-icon" style="background:rgba(59,130,246,0.1)">🎯</div>
+            <h3>Impact Fit</h3>
+            <p>Mencocokkan kamu dengan kegiatan yang paling relevan dengan profil.</p>
+          </div>
+          <div class="feature-card reveal">
+            <div class="feature-icon" style="background:rgba(245,158,11,0.1)">💡</div>
+            <h3>Why This Match</h3>
+            <p>Menjelaskan alasan di balik setiap rekomendasi secara transparan.</p>
+          </div>
+          <div class="feature-card reveal">
+            <div class="feature-icon" style="background:rgba(139,92,246,0.1)">✅</div>
+            <h3>Verified Community</h3>
+            <p>Membangun kepercayaan terhadap organisasi dan kegiatan sosial.</p>
+          </div>
+          <div class="feature-card reveal">
+            <div class="feature-icon" style="background:rgba(236,72,153,0.1)">📕</div>
+            <h3>Impact Passport</h3>
+            <p>Memvisualisasikan perjalanan dan dampak kontribusi kamu.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- User Journey -->
+    <section class="section journey" id="journey">
+      <div class="container">
+        <div class="section-head reveal">
+          <p class="section-tag">User Journey</p>
+          <h2 class="section-title">Perjalanan Kontribusi</h2>
+          <p class="section-desc">Dari Awareness hingga menjadi Changemaker — sebuah loop kontribusi yang berkelanjutan.</p>
+        </div>
+        <div class="journey-timeline reveal">
+          <div class="journey-item">
+            <div class="journey-dot">1</div>
+            <div class="journey-content">
+              <h4>Sign Up & Build Impact DNA</h4>
+              <p>Daftar dan isi profil kontribusimu.</p>
+            </div>
+          </div>
+          <div class="journey-line"></div>
+          <div class="journey-item">
+            <div class="journey-dot">2</div>
+            <div class="journey-content">
+              <h4>Get Personalized Recommendation</h4>
+              <p>Sistem memberikan rekomendasi berdasarkan Impact DNA.</p>
+            </div>
+          </div>
+          <div class="journey-line"></div>
+          <div class="journey-item">
+            <div class="journey-dot">3</div>
+            <div class="journey-content">
+              <h4>Understand Why It Fits</h4>
+              <p>Lihat mengapa kegiatan tersebut cocok untukmu.</p>
+            </div>
+          </div>
+          <div class="journey-line"></div>
+          <div class="journey-item">
+            <div class="journey-dot">4</div>
+            <div class="journey-content">
+              <h4>Join & Check-in</h4>
+              <p>Daftar kegiatan dan lakukan check-in saat hari H.</p>
+            </div>
+          </div>
+          <div class="journey-line"></div>
+          <div class="journey-item">
+            <div class="journey-dot">5</div>
+            <div class="journey-content">
+              <h4>Impact Recorded</h4>
+              <p>Kontribusimu tercatat dan dampakmu terlihat.</p>
+            </div>
+          </div>
+          <div class="journey-line"></div>
+          <div class="journey-item">
+            <div class="journey-dot">6</div>
+            <div class="journey-content">
+              <h4>Better Recommendation → Repeat</h4>
+              <p>Impact DNA diperbarui, rekomendasi semakin tepat.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Theme Alignment -->
+    <section class="section theme-section" id="theme">
+      <div class="container">
+        <div class="section-head reveal">
+          <p class="section-tag">Tema Lomba</p>
+          <h2 class="section-title">Crafting Purposeful Interfaces for Meaningful Social Solutions</h2>
+        </div>
+        <div class="theme-grid">
+          <div class="theme-card reveal">
+            <div class="theme-card-icon" style="background:rgba(16,185,129,0.1)">🎯</div>
+            <h3>Purposeful Interface</h3>
+            <p>Setiap input pengguna memiliki tujuan — dari minat hingga lokasi, semuanya digunakan untuk rekomendasi yang bermakna.</p>
+          </div>
+          <div class="theme-card reveal">
+            <div class="theme-card-icon" style="background:rgba(59,130,246,0.1)">🌍</div>
+            <h3>Meaningful Social Solution</h3>
+            <p>Menyelesaikan kesenjangan antara orang yang ingin membantu dan komunitas yang membutuhkan bantuan.</p>
+          </div>
+          <div class="theme-card reveal">
+            <div class="theme-card-icon" style="background:rgba(245,158,11,0.1)">✨</div>
+            <h3>Meaningful Impact</h3>
+            <p>Kontribusi tidak hilang — terekam, divisualisasikan, dan menjadi motivasi untuk terus berkontribusi.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta-section">
+      <div class="container">
+        <h2>Don't Just Find a Volunteer Opportunity</h2>
+        <p>Find where you make a difference.</p>
+        <a href="app.html" class="btn-cta">Coba Prototype VOLINK →</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <p>© 2026 VOLINK — Connecting People, Creating Impact</p>
+      <p><a href="app.html">Buka Prototype</a></p>
+    </div>
+  </footer>
+
+  <script src="js/landing.js"></script>
+</body>
+</html>
