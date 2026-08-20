@@ -2315,3 +2315,269 @@ img { max-width: 100%; display: block; }
   font-size: 0.72rem; color: var(--gray-400); white-space: nowrap;
 }
 .notif-unread .notif-icon { background: var(--green); }
+
+/* ============================================================
+   ROLE SELECTION
+   ============================================================ */
+.role-selection-screen {
+  min-height: 100vh; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 40px 24px; text-align: center;
+}
+.role-header { margin-bottom: 32px; }
+.role-logo { margin-bottom: 16px; }
+.role-header h1 { font-size: 1.5rem; font-weight: 800; color: var(--gray-800); margin-bottom: 8px; }
+.role-header p { font-size: 0.9rem; color: var(--gray-400); }
+.role-options { display: flex; flex-direction: column; gap: 16px; width: 100%; max-width: 400px; }
+.role-option-card {
+  background: var(--white); border: 2px solid var(--gray-200);
+  border-radius: var(--radius); padding: 24px 20px;
+  text-align: left; cursor: pointer; position: relative;
+  transition: var(--transition);
+}
+.role-option-card:hover { border-color: var(--green); transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+.role-option-icon { font-size: 2.5rem; margin-bottom: 12px; }
+.role-option-card h3 { font-size: 1.1rem; font-weight: 700; color: var(--gray-800); margin-bottom: 8px; }
+.role-option-card p { font-size: 0.85rem; color: var(--gray-400); line-height: 1.6; }
+.role-option-arrow {
+  position: absolute; right: 20px; top: 50%; transform: translateY(-50%);
+  font-size: 1.2rem; color: var(--gray-300); transition: var(--transition);
+}
+.role-option-card:hover .role-option-arrow { color: var(--green); transform: translateY(-50%) translateX(4px); }
+
+/* ============================================================
+   COMMUNITY SIGNUP
+   ============================================================ */
+.comm-signup-screen { padding-bottom: 32px; }
+.comm-signup-header {
+  padding: 60px 24px 20px; text-align: center;
+}
+.comm-signup-header h2 { font-size: 1.3rem; font-weight: 800; color: var(--gray-800); margin: 12px 0 4px; }
+.comm-signup-header p { font-size: 0.85rem; color: var(--gray-400); }
+.comm-signup-body { padding: 0 24px; }
+
+/* ============================================================
+   COMMUNITY DASHBOARD
+   ============================================================ */
+.comm-dashboard-screen { padding-bottom: 80px; }
+.comm-dash-header {
+  background: var(--gradient); padding: 60px 24px 24px;
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+}
+.comm-dash-top { display: flex; justify-content: space-between; align-items: center; }
+.comm-dash-greeting { color: var(--white); font-size: 1.3rem; font-weight: 800; }
+.comm-dash-content { padding: 16px 24px; }
+.comm-dash-section { margin-bottom: 24px; }
+.comm-dash-stats {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+  margin-bottom: 24px;
+}
+.comm-stat-card {
+  background: var(--white); border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius-sm); padding: 16px;
+  text-align: center;
+}
+.comm-stat-num { font-size: 1.5rem; font-weight: 800; color: var(--gray-800); }
+.comm-stat-label { font-size: 0.75rem; color: var(--gray-400); font-weight: 500; margin-top: 4px; }
+.comm-stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 0 0 20px; }
+
+/* ============================================================
+   COMMUNITY SCREENS (通用)
+   ============================================================ */
+.comm-screen { padding-bottom: 80px; }
+.comm-screen-header {
+  display: flex; align-items: center; gap: 12px;
+  padding: 60px 24px 16px;
+}
+.comm-screen-header h2 { font-size: 1.2rem; font-weight: 800; color: var(--gray-800); }
+.comm-list { padding: 0 24px; }
+
+/* Opportunity Card */
+.comm-opp-card {
+  background: var(--white); border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius); padding: 16px;
+  margin-bottom: 12px; cursor: pointer;
+  transition: var(--transition);
+}
+.comm-opp-card:hover { border-color: var(--green); box-shadow: var(--shadow); }
+.comm-opp-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.comm-opp-title { font-size: 0.95rem; font-weight: 700; color: var(--gray-800); }
+.comm-opp-meta { font-size: 0.78rem; color: var(--gray-400); margin-bottom: 8px; }
+.comm-opp-slots { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.comm-opp-slots span { font-size: 0.78rem; color: var(--gray-400); font-weight: 600; }
+.comm-opp-need { font-size: 0.82rem; color: var(--green); font-weight: 600; margin-bottom: 8px; }
+.comm-opp-actions { display: flex; gap: 8px; margin-top: 8px; }
+
+/* Status Badges */
+.comm-status-badge {
+  padding: 4px 10px; border-radius: var(--radius-full);
+  font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+}
+.comm-status-badge.published { background: rgba(22,163,74,0.1); color: var(--green); }
+.comm-status-badge.draft { background: rgba(156,163,175,0.1); color: var(--gray-400); }
+.comm-status-badge.completed { background: rgba(59,130,246,0.1); color: #3B82F6; }
+.comm-status-badge.live { background: rgba(239,68,68,0.1); color: #EF4444; }
+.comm-status-badge.pending { background: rgba(251,191,36,0.15); color: #D97706; }
+.comm-status-badge.verified { background: rgba(22,163,74,0.1); color: var(--green); }
+.comm-status-badge.rejected { background: rgba(239,68,68,0.1); color: #EF4444; }
+.comm-status-badge.need-revision { background: rgba(251,191,36,0.15); color: #D97706; }
+
+/* ============================================================
+   CREATE OPPORTUNITY
+   ============================================================ */
+.comm-create-progress { padding: 0 24px 16px; }
+.comm-create-body { padding: 0 24px; }
+.comm-create-footer {
+  display: flex; gap: 12px; padding: 16px 24px;
+  position: sticky; bottom: 0; background: var(--white);
+  border-top: 1px solid var(--gray-200);
+}
+.comm-create-footer .btn-primary-lg { flex: 1; }
+.comm-create-footer .btn-ghost { flex: 0 0 auto; }
+.impact-input-row { display: flex; gap: 8px; margin-bottom: 8px; }
+.impact-input-row input { flex: 1; }
+
+/* ============================================================
+   VOLUNTEER CARDS (Community Side)
+   ============================================================ */
+.comm-vol-card {
+  display: flex; justify-content: space-between; align-items: center;
+  background: var(--white); border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius); padding: 16px;
+  margin-bottom: 12px; cursor: pointer;
+  transition: var(--transition);
+}
+.comm-vol-card:hover { border-color: var(--green); box-shadow: var(--shadow); }
+.comm-vol-left { display: flex; align-items: center; gap: 12px; flex: 1; }
+.comm-vol-avatar { font-size: 2rem; }
+.comm-vol-info h4 { font-size: 0.9rem; font-weight: 700; color: var(--gray-800); }
+.comm-vol-skills { display: flex; gap: 4px; flex-wrap: wrap; margin: 4px 0; }
+.comm-vol-meta { font-size: 0.75rem; color: var(--gray-400); }
+.comm-vol-fit { text-align: center; flex-shrink: 0; }
+.fit-num { font-size: 1.3rem; font-weight: 800; color: var(--green); }
+.fit-label { font-size: 0.65rem; color: var(--gray-400); font-weight: 600; }
+
+/* ============================================================
+   VOLUNTEER DETAIL (Community Side)
+   ============================================================ */
+.vol-profile-header {
+  text-align: center; padding: 20px 0 16px;
+}
+.vol-profile-avatar { font-size: 4rem; margin-bottom: 8px; }
+.vol-profile-header h2 { font-size: 1.3rem; font-weight: 800; color: var(--gray-800); }
+.vol-profile-dna { font-size: 0.85rem; color: var(--gray-400); margin-top: 4px; }
+.vol-profile-fit { font-size: 0.9rem; color: var(--green); font-weight: 700; margin-top: 4px; }
+.vol-section { padding: 12px 0; }
+.vol-section h3 { font-size: 0.9rem; font-weight: 700; color: var(--gray-800); margin-bottom: 8px; }
+.vol-reasons { list-style: none; padding: 0; margin: 0; }
+.vol-reasons li { display: flex; align-items: center; gap: 8px; padding: 6px 0; font-size: 0.85rem; color: var(--gray-600); }
+.vol-reasons .check { color: var(--green); font-weight: 700; }
+.vol-skills { display: flex; gap: 6px; flex-wrap: wrap; }
+.vol-avail { display: flex; gap: 6px; flex-wrap: wrap; }
+.vol-history-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.vol-passport { font-size: 0.85rem; color: var(--gray-600); line-height: 1.6; }
+.vol-actions { display: flex; flex-direction: column; gap: 10px; padding: 16px 0; }
+
+/* ============================================================
+   PARTICIPANT MANAGEMENT
+   ============================================================ */
+.comm-participant-card {
+  display: flex; justify-content: space-between; align-items: center;
+  background: var(--white); border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius-sm); padding: 14px 16px;
+  margin-bottom: 8px;
+}
+.comm-participant-left { display: flex; align-items: center; gap: 12px; }
+.comm-participant-avatar { font-size: 1.8rem; }
+.comm-participant-name { font-size: 0.88rem; font-weight: 700; color: var(--gray-800); }
+.comm-participant-meta { font-size: 0.75rem; color: var(--gray-400); }
+.checkin-badge {
+  padding: 4px 10px; border-radius: var(--radius-full);
+  font-size: 0.72rem; font-weight: 700;
+}
+.checkin-badge.checked { background: rgba(22,163,74,0.1); color: var(--green); }
+.checkin-badge.pending { background: rgba(156,163,175,0.1); color: var(--gray-400); }
+.btn-ghost-sm {
+  padding: 6px 14px; border-radius: var(--radius-full);
+  border: 1.5px solid var(--gray-200); background: var(--white);
+  font-size: 0.78rem; font-weight: 600; color: var(--gray-600);
+  cursor: pointer; font-family: 'Poppins', sans-serif; transition: var(--transition);
+}
+.btn-ghost-sm:hover { border-color: var(--green); color: var(--green); }
+
+/* ============================================================
+   ACTIVITY MANAGEMENT (Live)
+   ============================================================ */
+.comm-live-status { padding: 0 24px 16px; }
+.comm-live-progress { margin: 12px 0; }
+.comm-live-progress span { font-size: 0.82rem; color: var(--gray-400); font-weight: 600; display: block; margin-top: 6px; }
+.comm-live-meta { font-size: 0.85rem; color: var(--gray-500); margin-top: 4px; }
+.comm-live-actions { padding: 0 24px; display: flex; flex-direction: column; gap: 10px; }
+
+/* ============================================================
+   COMMUNITY ATTENDANCE
+   ============================================================ */
+.comm-attendance-summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; padding: 0 24px 16px; }
+
+/* ============================================================
+   COMMUNITY IMPACT REPORT
+   ============================================================ */
+.comm-report-body { padding: 0 24px; }
+.impact-report-row {
+  background: var(--white); border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius-sm); padding: 14px; margin-bottom: 10px;
+}
+.impact-report-target { font-size: 0.85rem; color: var(--gray-600); margin-bottom: 8px; }
+.impact-report-actual { display: flex; align-items: center; gap: 10px; }
+.impact-report-actual label { font-size: 0.82rem; font-weight: 600; color: var(--gray-600); white-space: nowrap; }
+.impact-report-actual .form-input { flex: 1; }
+
+/* ============================================================
+   COMMUNITY IMPACT STATISTICS
+   ============================================================ */
+.comm-section { padding: 0 0 20px; }
+.comm-section h3 { font-size: 0.95rem; font-weight: 700; color: var(--gray-800); margin-bottom: 12px; }
+.comm-category-bars { display: flex; flex-direction: column; gap: 12px; }
+.comm-cat-bar { display: flex; align-items: center; gap: 10px; }
+.comm-cat-bar span:first-child { font-size: 0.82rem; font-weight: 600; color: var(--gray-600); min-width: 120px; }
+.comm-cat-bar span:last-child { font-size: 0.78rem; color: var(--gray-400); min-width: 36px; text-align: right; }
+.comm-cat-bar .slots-bar { flex: 1; }
+.comm-monthly-chart {
+  display: flex; align-items: flex-end; gap: 8px; height: 120px;
+  padding: 12px 0;
+}
+.comm-bar {
+  flex: 1; background: var(--green); border-radius: 4px 4px 0 0;
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: flex-end; padding-bottom: 4px; min-height: 16px;
+  position: relative;
+}
+.comm-bar .bar-label { font-size: 0.65rem; color: var(--gray-400); position: absolute; bottom: -18px; }
+.comm-bar .bar-value { font-size: 0.7rem; font-weight: 700; color: var(--white); }
+
+/* ============================================================
+   COMMUNITY PROFILE
+   ============================================================ */
+.comm-profile-header-card {
+  text-align: center; padding: 20px; margin: 0 24px 20px;
+  background: var(--white); border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius);
+}
+.comm-profile-avatar { font-size: 3rem; margin-bottom: 8px; }
+.comm-profile-header-card h2 { font-size: 1.1rem; font-weight: 800; color: var(--gray-800); }
+
+/* ============================================================
+   COMMUNITY VERIFICATION
+   ============================================================ */
+.comm-verify-summary { text-align: center; padding: 20px 0; }
+.comm-verify-icon { font-size: 3rem; margin-bottom: 12px; }
+.comm-verify-summary h3 { font-size: 1.1rem; font-weight: 800; color: var(--gray-800); margin-bottom: 8px; }
+.comm-verify-summary p { font-size: 0.85rem; color: var(--gray-400); margin-bottom: 16px; }
+
+/* ============================================================
+   COMMUNITY NAV OVERRIDE
+   ============================================================ */
+.comm-dash-content .quick-actions { grid-template-columns: repeat(4, 1fr); }
+.comm-dash-content .quick-action-btn { padding: 12px 6px; }
+.comm-dash-content .qa-icon { width: 40px; height: 40px; font-size: 1.1rem; }
+.comm-dash-content .quick-action-btn span { font-size: 0.7rem; }

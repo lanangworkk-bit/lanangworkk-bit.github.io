@@ -494,13 +494,25 @@ function showScreen(name) {
   currentScreen = name;
 
   const bottomNav = document.getElementById('bottomNav');
-  if (MAIN_SCREENS.includes(name)) {
+  const communityNav = document.getElementById('communityNav');
+  const isCommunityScreen = name.startsWith('community-') && name !== 'community-signup';
+  const isVolunteerScreen = MAIN_SCREENS.includes(name);
+
+  if (isCommunityScreen && communityNav) {
+    bottomNav.style.display = 'none';
+    communityNav.style.display = 'flex';
+    document.querySelectorAll('#communityNav .nav-item').forEach(n => {
+      n.classList.toggle('active', n.dataset.screen === name);
+    });
+  } else if (isVolunteerScreen) {
     bottomNav.style.display = 'flex';
+    if (communityNav) communityNav.style.display = 'none';
     document.querySelectorAll('.nav-item').forEach(n => {
       n.classList.toggle('active', n.dataset.screen === name);
     });
   } else {
     bottomNav.style.display = 'none';
+    if (communityNav) communityNav.style.display = 'none';
   }
 
   if (name !== prev) previousScreen = prev;
@@ -540,6 +552,21 @@ function renderScreen(name) {
     case 'rating': break;
     case 'edit-profile': break;
     case 'share-card': break;
+    case 'community-signup': renderCommunitySignup(); break;
+    case 'community-home': renderCommunityDashboard(); break;
+    case 'community-opportunities': renderCommunityOpportunities(); break;
+    case 'community-create-opportunity': renderCreateOpportunity(); break;
+    case 'community-find-volunteers': renderFindVolunteers(); break;
+    case 'community-volunteer-detail': break;
+    case 'community-participants': renderParticipants(); break;
+    case 'community-attendance': renderAttendance(); break;
+    case 'community-activity-live': break;
+    case 'community-impact-report': renderImpactReport(); break;
+    case 'community-impact-verify': renderImpactVerification(); break;
+    case 'community-impact-stats': renderCommunityImpactStats(); break;
+    case 'community-notifications': renderCommunityNotifications(); break;
+    case 'community-profile': renderCommunityProfileSettings(); break;
+    case 'community-verification': renderCommunityVerification(); break;
   }
 }
 
@@ -552,13 +579,22 @@ function goToLogin() {
 
 function skipToApp() {
   clearInterval(splashTimer);
-  const saved = localStorage.getItem('volink-profile');
-  if (saved) {
-    userProfile = JSON.parse(saved);
-    showScreen('home');
-    showToast('Selamat datang kembali, ' + (userProfile.name || 'Raka') + '! 👋', 'success');
+  const role = localStorage.getItem('volink-role');
+  if (role === 'community') {
+    const cp = JSON.parse(localStorage.getItem('volink-community-profile') || 'null');
+    if (cp) { communityProfile = cp; showScreen('community-home'); }
+    else showScreen('community-signup');
+  } else if (role === 'volunteer') {
+    const saved = localStorage.getItem('volink-profile');
+    if (saved) {
+      userProfile = JSON.parse(saved);
+      showScreen('home');
+      showToast('Selamat datang kembali, ' + (userProfile.name || 'Raka') + '! 👋', 'success');
+    } else {
+      showScreen('login');
+    }
   } else {
-    showScreen('login');
+    showScreen('role-selection');
   }
 }
 
