@@ -166,8 +166,13 @@
             <div class="home-greeting" id="homeGreeting">Siap menciptakan dampak hari ini?</div>
             <div class="home-name">Hi, <span id="homeName">Raka</span>! 👋</div>
           </div>
-          <div class="home-avatar" onclick="showScreen('profile')">
-            <span>🧑</span>
+          <div class="home-header-actions">
+            <button class="notif-bell" onclick="showScreen('notifications')">
+              🔔<span class="notif-badge" id="notifBadge">2</span>
+            </button>
+            <div class="home-avatar" onclick="showScreen('profile')">
+              <span>🧑</span>
+            </div>
           </div>
         </div>
         <div class="home-search">
@@ -177,6 +182,45 @@
       </div>
 
       <div class="home-content">
+        <div class="home-section" id="homeCountdownSection" style="display:none">
+          <div class="home-section-header">
+            <h3>Aktivitas Berikutnya</h3>
+          </div>
+          <div id="homeCountdown"></div>
+        </div>
+
+        <div class="home-section">
+          <div class="home-section-header">
+            <h3>Aksi Cepat</h3>
+          </div>
+          <div class="quick-actions">
+            <button class="quick-action-btn" onclick="showScreen('explore')">
+              <div class="qa-icon" style="background:rgba(22,163,74,0.1)">🔍</div>
+              <span>Explore</span>
+            </button>
+            <button class="quick-action-btn" onclick="showScreen('favorites')">
+              <div class="qa-icon" style="background:rgba(239,68,68,0.1)">❤️</div>
+              <span>Bookmark</span>
+            </button>
+            <button class="quick-action-btn" onclick="showScreen('leaderboard')">
+              <div class="qa-icon" style="background:rgba(251,191,36,0.15)">🏆</div>
+              <span>Peringkat</span>
+            </button>
+            <button class="quick-action-btn" onclick="showScreen('badges')">
+              <div class="qa-icon" style="background:rgba(139,92,246,0.1)">🎖️</div>
+              <span>Badge</span>
+            </button>
+            <button class="quick-action-btn" onclick="showScreen('notifications')">
+              <div class="qa-icon" style="background:rgba(15,118,110,0.1)">🔔</div>
+              <span>Notifikasi</span>
+            </button>
+            <button class="quick-action-btn" onclick="generateShareCard()">
+              <div class="qa-icon" style="background:rgba(59,130,246,0.1)">📤</div>
+              <span>Share Dampak</span>
+            </button>
+          </div>
+        </div>
+
         <div class="home-section">
           <div class="home-section-header">
             <h3>Browse Berdasarkan Minat</h3>
@@ -230,6 +274,8 @@
         <input type="text" placeholder="Cari kegiatan..." id="exploreSearch" oninput="filterExplore()">
       </div>
       <div class="explore-filters" id="exploreFilters"></div>
+      <div class="explore-filters" id="exploreLocationFilters"></div>
+      <div class="explore-filters" id="exploreDateFilters" style="margin-top:-8px"></div>
       <div class="explore-list" id="exploreList"></div>
     </div>
   </div>
@@ -270,6 +316,11 @@
 
         <div class="detail-section" id="detailMatchSection">
           <div class="match-card" id="detailMatch"></div>
+        </div>
+
+        <div class="detail-section" id="detailReviewsSection">
+          <h3>Review Volunteer</h3>
+          <div id="detailReviews"></div>
         </div>
 
         <div class="detail-section" id="detailVerificationSection">
@@ -536,6 +587,30 @@
     </div>
   </div>
 
+  <!-- ========== NOTIFICATIONS ========== -->
+  <div class="screen" id="screen-notifications">
+    <div class="notifications-screen">
+      <div class="notifications-header">
+        <h2>Notifikasi</h2>
+      </div>
+      <div class="notif-list" id="notifList"></div>
+    </div>
+  </div>
+
+  <!-- ========== IMPACT SHARE CARD ========== -->
+  <div class="screen" id="screen-share-card">
+    <div class="share-card-screen">
+      <button class="detail-back" onclick="goBack()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <div class="share-card-preview" id="shareCardPreview"></div>
+      <div class="share-card-actions">
+        <button class="btn-primary-lg" onclick="showShareModal()">📤 Bagikan Kartu Dampak</button>
+        <button class="btn-ghost" onclick="goBack()">Kembali</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ========== EDIT PROFILE ========== -->
   <div class="screen" id="screen-edit-profile">
     <div class="edit-profile-screen">
@@ -633,6 +708,7 @@
           <div class="settings-item"><span>Notifikasi</span><div class="toggle-switch active" onclick="this.classList.toggle('active')"><div class="toggle-knob"></div></div></div>
           <div class="settings-item"><span>Lokasi</span><div class="toggle-switch active" onclick="this.classList.toggle('active')"><div class="toggle-knob"></div></div></div>
           <div class="settings-item"><span>Bahasa</span><span class="settings-value">Indonesia</span></div>
+          <div class="settings-item"><span>Mode Gelap</span><div class="toggle-switch${isDarkMode?' active':''}" onclick="toggleDarkMode();this.classList.toggle('active')"><div class="toggle-knob"></div></div></div>
           <div class="settings-item" style="cursor:pointer" onclick="openEditProfile()">
             <span>✏️ Edit Profil</span><span class="settings-value">→</span>
           </div>

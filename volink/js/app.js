@@ -523,7 +523,7 @@ function goBack() {
 
 function renderScreen(name) {
   switch(name) {
-    case 'home': renderHome(); break;
+    case 'home': renderHome(); renderHomeCountdown(); break;
     case 'explore': renderExplore(); break;
     case 'activities': renderActivities(); break;
     case 'passport': renderPassport(); break;
@@ -535,9 +535,11 @@ function renderScreen(name) {
     case 'favorites': renderFavorites(); break;
     case 'leaderboard': renderLeaderboard(); break;
     case 'badges': renderBadges(); break;
+    case 'notifications': renderNotifications(); break;
     case 'community': break;
     case 'rating': break;
     case 'edit-profile': break;
+    case 'share-card': break;
   }
 }
 
@@ -894,6 +896,7 @@ function createActivityCard(activity, showFit = true, compact = false) {
   const fit = calculateFit(activity);
   const cause = CAUSES.find(c => c.id === activity.causes[0]);
   const loc = LOCATIONS.find(l => l.id === activity.location);
+  const interested = Math.floor(Math.random() * 20) + 5;
 
   const card = document.createElement('div');
   card.className = 'activity-card';
@@ -912,6 +915,7 @@ function createActivityCard(activity, showFit = true, compact = false) {
       <span class="activity-meta-item">📍 ${loc?.label || activity.location}</span>
       <span class="activity-meta-item">👥 ${activity.slotsFilled}/${activity.slots}</span>
     </div>
+    <div class="activity-card-social">🔥 ${interested} orang tertarik</div>
     <div class="activity-card-tags">
       ${activity.causes.map(c => {
         const x = CAUSES.find(y => y.id === c);
@@ -991,6 +995,8 @@ function filterHome() {
    EXPLORE
    ============================================================ */
 let exploreFilter = 'Semua';
+let exploreLocationFilter = 'Semua';
+let exploreDateFilter = 'Semua';
 
 function renderExplore() {
   const filtersContainer = document.getElementById('exploreFilters');
@@ -1007,6 +1013,34 @@ function renderExplore() {
     filtersContainer.appendChild(chip);
   });
 
+  const locContainer = document.getElementById('exploreLocationFilters');
+  locContainer.innerHTML = '';
+  const locFilters = ['Semua', ...LOCATIONS.map(l => l.label)];
+  locFilters.forEach(l => {
+    const chip = document.createElement('div');
+    chip.className = 'filter-chip' + (l === exploreLocationFilter ? ' active' : '');
+    chip.textContent = '📍 ' + l;
+    chip.addEventListener('click', () => {
+      exploreLocationFilter = l;
+      renderExplore();
+    });
+    locContainer.appendChild(chip);
+  });
+
+  const dateContainer = document.getElementById('exploreDateFilters');
+  dateContainer.innerHTML = '';
+  const dateFilters = ['Semua', 'Minggu Ini', 'Minggu Depan', 'Akhir Pekan'];
+  dateFilters.forEach(d => {
+    const chip = document.createElement('div');
+    chip.className = 'filter-chip' + (d === exploreDateFilter ? ' active' : '');
+    chip.textContent = '📅 ' + d;
+    chip.addEventListener('click', () => {
+      exploreDateFilter = d;
+      renderExplore();
+    });
+    dateContainer.appendChild(chip);
+  });
+
   filterExplore();
 }
 
@@ -1015,11 +1049,40 @@ function filterExplore() {
   const list = document.getElementById('exploreList');
   list.innerHTML = '';
 
-  let filtered = ACTIVITIES;
+  let filtered = [...ACTIVITIES];
 
   if (exploreFilter !== 'Semua') {
     const cause = CAUSES.find(c => c.label === exploreFilter);
     if (cause) filtered = filtered.filter(a => a.causes.includes(cause.id));
+  }
+
+  if (exploreLocationFilter !== 'Semua') {
+    const loc = LOCATIONS.find(l => l.label === exploreLocationFilter);
+    if (loc) filtered = filtered.filter(a => a.location === loc.id);
+  }
+
+  if (exploreDateFilter !== 'Semua') {
+    const now = new Date();
+    filtered = filtered.filter(a => {
+      const d = new Date(a.date);
+      if (exploreDateFilter === 'Minggu Ini') {
+        const weekEnd = new Date(now);
+        weekEnd.setDate(now.getDate() + 7);
+        return d >= now && d <= weekEnd;
+      }
+      if (exploreDateFilter === 'Minggu Depan') {
+        const nextWeekStart = new Date(now);
+        nextWeekStart.setDate(now.getDate() + 7);
+        const nextWeekEnd = new Date(now);
+        nextWeekEnd.setDate(now.getDate() + 14);
+        return d >= nextWeekStart && d <= nextWeekEnd;
+      }
+      if (exploreDateFilter === 'Akhir Pekan') {
+        const day = d.getDay();
+        return day === 0 || day === 6;
+      }
+      return true;
+    });
   }
 
   if (keyword) {
@@ -1091,6 +1154,9 @@ function openDetail(activity) {
     <ul class="match-reasons">
       ${reasons.map(r => `<li><span class="check">✓</span>${r}</li>`).join('')}
     </ul>`;
+
+  const reviewsHtml = renderReviews(activity.id);
+  document.getElementById('detailReviews').innerHTML = reviewsHtml;
 
   if (community?.verified) {
     document.getElementById('detailVerificationSection').style.display = 'block';
@@ -1527,6 +1593,168 @@ function resetApp() {
 }
 
 /* ============================================================
+   NOTIFICATIONS
+   ============================================================ */
+const MOCK_NOTIFICATIONS = [
+  { icon: '🌿', title: 'Kegiatan Baru!', desc: 'Bersih Pantai Sanur sesuai minatmu', time: '2 jam lalu', unread: true },
+  { icon: '🏆', title: 'Badge Baru!', desc: 'Kamu mendapatkan badge "Pahlawan Lingkungan"', time: '1 hari lalu', unread: true },
+  { icon: '📋', title: 'Pengingat', desc: 'Mengajar Anak Pesisir besok pukul 13:00', time: '1 hari lalu', unread: false },
+  { icon: '💚', title: 'Impact Update', desc: 'Kontribusimu telah membantu 35 orang', time: '3 hari lalu', unread: false },
+  { icon: '🎯', title: 'Rekomendasi Baru', desc: '3 kegiatan baru cocok untukmu', time: '5 hari lalu', unread: false },
+  { icon: '⭐', title: 'Terima Kasih!', desc: 'Kamu naik peringkat di leaderboard', time: '1 minggu lalu', unread: false },
+];
+
+function renderNotifications() {
+  const container = document.getElementById('notifList');
+  container.innerHTML = '';
+
+  MOCK_NOTIFICATIONS.forEach(notif => {
+    const item = document.createElement('div');
+    item.className = 'notif-item' + (notif.unread ? ' notif-unread' : '');
+    item.innerHTML = `
+      <div class="notif-icon">${notif.icon}</div>
+      <div class="notif-info">
+        <h4>${notif.title}</h4>
+        <p>${notif.desc}</p>
+      </div>
+      <span class="notif-time">${notif.time}</span>`;
+    item.addEventListener('click', () => {
+      notif.unread = false;
+      item.classList.remove('notif-unread');
+    });
+    container.appendChild(item);
+  });
+}
+
+/* ============================================================
+   COUNTDOWN
+   ============================================================ */
+function renderHomeCountdown() {
+  const section = document.getElementById('homeCountdownSection');
+  const container = document.getElementById('homeCountdown');
+
+  const upcoming = joinedActivities.length > 0 ? joinedActivities : ['a1'];
+  const activity = getActivityById(upcoming[0]);
+
+  if (!activity) { section.style.display = 'none'; return; }
+
+  const now = new Date();
+  const activityDate = new Date(activity.date + 'T' + activity.time.split(' - ')[0] + ':00');
+  const diff = activityDate - now;
+
+  if (diff < 0) { section.style.display = 'none'; return; }
+
+  section.style.display = 'block';
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const loc = LOCATIONS.find(l => l.id === activity.location);
+
+  let countdownText = '';
+  if (days > 0) countdownText = `${days}h ${hours}j lagi`;
+  else countdownText = `${hours} jam lagi`;
+
+  container.innerHTML = `
+    <div class="countdown-card">
+      <span class="countdown-icon">${activity.image}</span>
+      <div class="countdown-info">
+        <h4>${activity.title}</h4>
+        <p>${formatDateShort(activity.date)} · ${loc?.label || ''}</p>
+      </div>
+      <span class="countdown-time">${countdownText}</span>
+    </div>`;
+}
+
+/* ============================================================
+   SHARE IMPACT CARD
+   ============================================================ */
+function generateShareCard() {
+  const name = userProfile.name || 'Raka';
+  const dnaName = document.getElementById('dnaName')?.textContent || 'Community Changemaker';
+  const totalHours = MOCK_IMPACT_HISTORY.reduce((s, h) => s + h.hours, 0);
+  const totalActivities = MOCK_IMPACT_HISTORY.length;
+  const totalPeople = MOCK_IMPACT_HISTORY.reduce((s, h) => {
+    const p = h.metrics.find(m => m.label.includes('orang') || m.label.includes('anak') || m.label.includes('siswa') || m.label.includes('pemuda') || m.label.includes('korban') || m.label.includes('Teredukasi'));
+    return s + (p ? parseInt(p.value) || 0 : 0);
+  }, 0);
+
+  document.getElementById('shareCardPreview').innerHTML = `
+    <div class="share-card-inner">
+      <div class="share-card-logo">💚 VOLINK</div>
+      <div class="share-card-name">${name}</div>
+      <div class="share-card-dna">🧬 ${dnaName}</div>
+      <div class="share-card-stats">
+        <div class="share-card-stat">
+          <div class="num">${totalHours}</div>
+          <div class="lbl">Jam Volunteer</div>
+        </div>
+        <div class="share-card-stat">
+          <div class="num">${totalActivities}</div>
+          <div class="lbl">Kegiatan</div>
+        </div>
+        <div class="share-card-stat">
+          <div class="num">${totalPeople}</div>
+          <div class="lbl">Orang Terbantu</div>
+        </div>
+      </div>
+      <div class="share-card-tagline">Connecting People, Creating Impact 💚</div>
+    </div>
+    <div class="share-card-footer">
+      <span>volink.app</span>
+    </div>`;
+
+  previousScreen = currentScreen;
+  showScreen('share-card');
+}
+
+/* ============================================================
+   DARK MODE
+   ============================================================ */
+let isDarkMode = localStorage.getItem('volink-theme') === 'dark';
+
+function toggleDarkMode() {
+  isDarkMode = !isDarkMode;
+  document.documentElement.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
+  localStorage.setItem('volink-theme', isDarkMode ? 'dark' : 'light');
+  showToast(isDarkMode ? 'Mode gelap aktif 🌙' : 'Mode terang aktif ☀️', 'info');
+}
+
+function applyTheme() {
+  document.documentElement.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
+}
+
+/* ============================================================
+   REVIEWS ON DETAIL
+   ============================================================ */
+const MOCK_REVIEWS = [
+  { name: 'Ayunda', avatar: '👩', rating: 5, comment: 'Kegiatannya sangat terorganisir dan bermanfaat!', date: '2026-08-15' },
+  { name: 'Budi', avatar: '🧑', rating: 4, comment: 'Pengalaman yang luar biasa, recommended!', date: '2026-08-10' },
+  { name: 'Sari', avatar: '👩', rating: 5, comment: 'Panitia ramah dan kegiatan menyenangkan.', date: '2026-08-05' },
+];
+
+function renderReviews(activityId) {
+  const reviews = MOCK_REVIEWS;
+  if (reviews.length === 0) return '';
+
+  return `
+    <div class="detail-section">
+      <h3>Review Volunteer (${reviews.length})</h3>
+      ${reviews.map(r => `
+        <div class="review-item">
+          <div class="review-header">
+            <span class="review-avatar">${r.avatar}</span>
+            <div>
+              <div class="review-name">${r.name}</div>
+              <div class="review-stars">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</div>
+            </div>
+            <span class="review-date">${formatDateShort(r.date)}</span>
+          </div>
+          <p class="review-comment">${r.comment}</p>
+        </div>
+      `).join('')}
+    </div>`;
+}
+
+/* ============================================================
    INIT
    ============================================================ */
 document.addEventListener('DOMContentLoaded', () => {
@@ -1538,5 +1766,6 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch(e) {}
   }
 
+  applyTheme();
   startSplashAnimation();
 });
