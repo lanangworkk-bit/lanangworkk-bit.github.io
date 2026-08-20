@@ -394,7 +394,8 @@
         <p id="completionMessage">Setiap kontribusimu menciptakan dampak nyata. Terima kasih!</p>
       </div>
       <button class="btn-primary-lg" onclick="showScreen('passport')">Lihat Impact Passport →</button>
-      <button class="btn-ghost" onclick="showScreen('next-recommendation')" style="margin-top:12px">Lihat Rekomendasi Berikutnya</button>
+      <button class="btn-ghost" onclick="goToRating()" style="margin-top:12px">⭐ Beri Penilaian</button>
+      <button class="btn-ghost" onclick="showScreen('next-recommendation')" style="margin-top:8px">🎯 Lihat Rekomendasi Berikutnya</button>
     </div>
   </div>
 
@@ -463,8 +464,114 @@
     </div>
   </div>
 
+  <!-- ========== COMMUNITY DETAIL ========== -->
+  <div class="screen" id="screen-community">
+    <div class="community-screen">
+      <button class="detail-back" onclick="goBack()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <div class="community-hero" id="communityHero"></div>
+      <div class="community-content" id="communityContent"></div>
+    </div>
+  </div>
+
+  <!-- ========== FAVORITES ========== -->
+  <div class="screen" id="screen-favorites">
+    <div class="favorites-screen">
+      <div class="favorites-header">
+        <h2>Bookmark</h2>
+        <p>Kegiatan yang kamu simpan</p>
+      </div>
+      <div id="favoritesList"></div>
+    </div>
+  </div>
+
+  <!-- ========== LEADERBOARD ========== -->
+  <div class="screen" id="screen-leaderboard">
+    <div class="leaderboard-screen">
+      <div class="leaderboard-header">
+        <h2>Leaderboard</h2>
+        <p>Peringkat volunteer teraktif</p>
+      </div>
+      <div class="leaderboard-tabs">
+        <button class="tab-pill active" onclick="switchLeaderboard('hours', this)">Jam Volunteer</button>
+        <button class="tab-pill" onclick="switchLeaderboard('activities', this)">Kegiatan</button>
+      </div>
+      <div id="leaderboardList"></div>
+    </div>
+  </div>
+
+  <!-- ========== BADGES ========== -->
+  <div class="screen" id="screen-badges">
+    <div class="badges-screen">
+      <div class="badges-header">
+        <h2>Pencapaian</h2>
+        <p>Badge yang sudah kamu kumpulkan</p>
+      </div>
+      <div class="badges-grid" id="badgesGrid"></div>
+    </div>
+  </div>
+
+  <!-- ========== RATING ========== -->
+  <div class="screen" id="screen-rating">
+    <div class="rating-screen">
+      <button class="detail-back" onclick="goBack()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <div class="rating-content">
+        <div class="rating-emoji" id="ratingEmoji">⭐</div>
+        <h2>Beri Penilaian</h2>
+        <p class="rating-sub" id="ratingActivityName"></p>
+        <div class="rating-stars" id="ratingStars">
+          <button class="star" onclick="setRating(1)">★</button>
+          <button class="star" onclick="setRating(2)">★</button>
+          <button class="star" onclick="setRating(3)">★</button>
+          <button class="star" onclick="setRating(4)">★</button>
+          <button class="star" onclick="setRating(5)">★</button>
+        </div>
+        <div class="rating-label" id="ratingLabel">Ketuk bintang untuk memberi penilaian</div>
+        <textarea class="rating-textarea" id="ratingComment" placeholder="Tulis review opsional..." rows="3"></textarea>
+        <button class="btn-primary-lg" onclick="submitRating()" id="ratingSubmitBtn" disabled>Kirim Penilaian</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== EDIT PROFILE ========== -->
+  <div class="screen" id="screen-edit-profile">
+    <div class="edit-profile-screen">
+      <div class="edit-profile-header">
+        <button class="detail-back" onclick="goBack()" style="position:relative;top:0;left:0">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <h2>Edit Profil</h2>
+      </div>
+      <div class="edit-profile-form">
+        <div class="form-group">
+          <label class="form-label">Nama Lengkap</label>
+          <input type="text" class="form-input" id="editName">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input type="email" class="form-input" id="editEmail" value="raka@univ.ac.id">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Bio</label>
+          <textarea class="form-input" id="editBio" rows="3" placeholder="Ceritakan tentang dirimu...">Mahasiswa yang passionate dengan lingkungan dan pendidikan.</textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Minat</label>
+          <div class="edit-tags" id="editCauses"></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Keahlian</label>
+          <div class="edit-tags" id="editSkills"></div>
+        </div>
+        <button class="btn-primary-lg" onclick="saveProfileEdit()">Simpan Perubahan</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ========== NEXT RECOMMENDATION ========== -->
-  <div class="screen" id="screen-next-recommendation">
     <div class="next-rec-screen">
       <div class="next-rec-header">
         <div class="next-rec-icon">🎯</div>
@@ -504,16 +611,39 @@
         <button class="btn-ghost" onclick="showScreen('passport')" style="width:100%;margin-top:8px">Lihat Passport →</button>
       </div>
       <div class="profile-section">
+        <h3>Lainnya</h3>
+        <div class="profile-settings">
+          <div class="settings-item" style="cursor:pointer" onclick="showScreen('leaderboard')">
+            <span>🏆 Leaderboard</span><span class="settings-value">→</span>
+          </div>
+          <div class="settings-item" style="cursor:pointer" onclick="showScreen('badges')">
+            <span>🎖️ Pencapaian</span><span class="settings-value">→</span>
+          </div>
+          <div class="settings-item" style="cursor:pointer" onclick="showScreen('favorites')">
+            <span>❤️ Bookmark</span><span class="settings-value">→</span>
+          </div>
+          <div class="settings-item" style="cursor:pointer" onclick="showShareModal()">
+            <span>📤 Bagikan VOLINK</span><span class="settings-value">→</span>
+          </div>
+        </div>
+      </div>
+      <div class="profile-section">
         <h3>Pengaturan</h3>
         <div class="profile-settings">
           <div class="settings-item"><span>Notifikasi</span><div class="toggle-switch active" onclick="this.classList.toggle('active')"><div class="toggle-knob"></div></div></div>
           <div class="settings-item"><span>Lokasi</span><div class="toggle-switch active" onclick="this.classList.toggle('active')"><div class="toggle-knob"></div></div></div>
           <div class="settings-item"><span>Bahasa</span><span class="settings-value">Indonesia</span></div>
+          <div class="settings-item" style="cursor:pointer" onclick="openEditProfile()">
+            <span>✏️ Edit Profil</span><span class="settings-value">→</span>
+          </div>
         </div>
       </div>
       <button class="btn-ghost" onclick="resetApp()" style="width:100%;color:#EF4444;border-color:#FEE2E2">Keluar</button>
     </div>
   </div>
+
+  <!-- ========== TOAST NOTIFICATION ========== -->
+  <div class="toast-container" id="toastContainer"></div>
 
   <!-- ========== BOTTOM NAVIGATION ========== -->
   <div class="bottom-nav" id="bottomNav" style="display:none">

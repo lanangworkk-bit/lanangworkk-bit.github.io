@@ -9,7 +9,11 @@ let currentScreen = 'splash';
 let previousScreen = 'home';
 let obStep = 0;
 let currentActivity = null;
+let currentCommunity = null;
 let joinedActivities = [];
+let favorites = JSON.parse(localStorage.getItem('volink-favorites') || '[]');
+let currentRating = 0;
+let currentRatingActivity = null;
 
 let userProfile = {
   name: 'Raka',
@@ -27,6 +31,406 @@ let userProfile = {
 };
 
 const MAIN_SCREENS = ['home', 'explore', 'activities', 'impact', 'profile'];
+
+/* ============================================================
+   TOAST NOTIFICATION SYSTEM
+   ============================================================ */
+function showToast(message, type = 'info', duration = 3000) {
+  const container = document.getElementById('toastContainer');
+  const icons = { success: '✅', error: '❌', info: 'ℹ️', warning: '⚠️' };
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.innerHTML = `
+    <span class="toast-icon">${icons[type]}</span>
+    <span class="toast-msg">${message}</span>
+    <button class="toast-close" onclick="removeToast(this.parentElement)">✕</button>`;
+  container.appendChild(toast);
+  setTimeout(() => removeToast(toast), duration);
+}
+
+function removeToast(toast) {
+  if (!toast || !toast.parentElement) return;
+  toast.classList.add('removing');
+  setTimeout(() => toast.remove(), 300);
+}
+
+/* ============================================================
+   SPLASH AUTO-ADVANCE
+   ============================================================ */
+let splashTimer = null;
+let splashDot = 0;
+
+function startSplashAnimation() {
+  const dots = document.querySelectorAll('.splash-dots .dot');
+  splashDot = 0;
+  clearInterval(splashTimer);
+  splashTimer = setInterval(() => {
+    dots.forEach(d => d.classList.remove('active'));
+    splashDot = (splashDot + 1) % dots.length;
+    dots[splashDot].classList.add('active');
+  }, 2000);
+}
+
+/* ============================================================
+   FAVORITES / BOOKMARKS
+   ============================================================ */
+function toggleFavorite(activityId, event) {
+  if (event) event.stopPropagation();
+  const idx = favorites.indexOf(activityId);
+  if (idx >= 0) {
+    favorites.splice(idx, 1);
+    showToast('Dihapus dari bookmark', 'info');
+  } else {
+    favorites.push(activityId);
+    showToast('Ditambahkan ke bookmark', 'success');
+  }
+  localStorage.setItem('volink-favorites', JSON.stringify(favorites));
+
+  document.querySelectorAll('.fav-btn').forEach(btn => {
+    if (btn.dataset.id === activityId) {
+      btn.classList.toggle('active', favorites.includes(activityId));
+      btn.textContent = favorites.includes(activityId) ? '❤️' : '🤍';
+    }
+  });
+}
+
+function renderFavorites() {
+  const container = document.getElementById('favoritesList');
+  container.innerHTML = '';
+  container.className = 'fav-list';
+
+  if (favorites.length === 0) {
+    container.innerHTML = `<div class="empty-state"><div class="empty-icon">🤍</div><h4>Belum ada bookmark</h4><p>Simpan kegiatan menarik untuk nanti</p></div>`;
+    return;
+  }
+
+  favorites.forEach(id => {
+    const activity = getActivityById(id);
+    if (activity) container.appendChild(createActivityCard(activity));
+  });
+}
+
+function addFavButtonToCard(card, activityId) {
+  const btn = document.createElement('button');
+  btn.className = 'fav-btn' + (favorites.includes(activityId) ? ' active' : '');
+  btn.dataset.id = activityId;
+  btn.textContent = favorites.includes(activityId) ? '❤️' : '🤍';
+  btn.onclick = (e) => toggleFavorite(activityId, e);
+  card.appendChild(btn);
+}
+
+/* ============================================================
+   COMMUNITY DETAIL
+   ============================================================ */
+function openCommunity(communityId) {
+  const community = getCommunity(communityId);
+  if (!community) return;
+  currentCommunity = community;
+
+  const causeColors = { environment: '#16A34A', education: '#0F766E', humanity: '#FBBF24', health: '#EF4444', animals: '#EC4899', community: '#0B2D3A' };
+  const communityActivities = ACTIVITIES.filter(a => a.community === communityId);
+
+  document.getElementById('communityHero').style.background = `${community.verified ? 'var(--green)' : 'var(--gray-200)'}15`;
+  document.getElementById('communityHero').innerHTML = community.emoji;
+
+  document.getElementById('communityContent').innerHTML = `
+    <div class="community-info-card">
+      <div class="community-info-top">
+        <div class="community-info-icon">${community.emoji}</div>
+        <div>
+          <div class="community-info-name">${community.name}</div>
+          ${community.verified ? '<span class="verified-badge" style="margin-top:4px">✅ Verified Community</span>' : ''}
+        </div>
+      </div>
+      <p class="community-info-desc">${community.description}</p>
+      <div class="community-stats-row">
+        <div class="community-stat">⭐ <strong>${community.rating}</strong> Rating</div>
+        <div class="community-stat">📋 <strong>${community.totalActivities}</strong> Kegiatan</div>
+        <div class="community-stat">👥 <strong>${community.members}</strong> Anggota</div>
+      </div>
+    </div>
+    ${community.verified ? `
+    <div class="community-info-card">
+      <h4 style="font-size:0.9rem;font-weight:700;color:var(--gray-800);margin-bottom:12px">Verifikasi Komunitas</h4>
+      <div class="verification-list">
+        <div class="verification-item"><span class="v-check">✓</span>Identitas jelas</div>
+        <div class="verification-item"><span class="v-check">✓</span>Kegiatan nyata dan terverifikasi</div>
+        <div class="verification-item"><span class="v-check">✓</span>Riwayat kegiatan tersedia</div>
+        <div class="verification-item"><span class="v-check">✓</span>Review positif dari volunteer</div>
+      </div>
+    </div>` : ''}
+    <div class="community-activities">
+      <div class="community-section-title">Kegiatan (${communityActivities.length})</div>
+      <div id="communityActivities"></div>
+    </div>`;
+
+  const actContainer = document.getElementById('communityActivities');
+  if (communityActivities.length === 0) {
+    actContainer.innerHTML = '<p style="text-align:center;color:var(--gray-400);padding:20px 0">Belum ada kegiatan</p>';
+  } else {
+    communityActivities.forEach(a => actContainer.appendChild(createActivityCard(a)));
+  }
+
+  previousScreen = currentScreen;
+  showScreen('community');
+}
+
+/* ============================================================
+   LEADERBOARD
+   ============================================================ */
+const MOCK_LEADERBOARD = [
+  { name: 'Ayunda', avatar: '👩', hours: 48, activities: 12 },
+  { name: 'Budi', avatar: '🧑', hours: 42, activities: 10 },
+  { name: 'Raka', avatar: '🧑', hours: 24, activities: 6, isMe: true },
+  { name: 'Sari', avatar: '👩', hours: 22, activities: 8 },
+  { name: 'Dewi', avatar: '👩', hours: 20, activities: 7 },
+  { name: 'Eka', avatar: '🧑', hours: 18, activities: 5 },
+  { name: 'Fajar', avatar: '🧑', hours: 16, activities: 4 },
+  { name: 'Gita', avatar: '👩', hours: 14, activities: 4 },
+  { name: 'Hadi', avatar: '🧑', hours: 12, activities: 3 },
+  { name: 'Indah', avatar: '👩', hours: 10, activities: 3 },
+];
+
+let lbTab = 'hours';
+
+function switchLeaderboard(tab, btn) {
+  lbTab = tab;
+  document.querySelectorAll('.leaderboard-tabs .tab-pill').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  renderLeaderboard();
+}
+
+function renderLeaderboard() {
+  const container = document.getElementById('leaderboardList');
+  container.innerHTML = '';
+  container.className = 'lb-list';
+
+  const sorted = [...MOCK_LEADERBOARD].sort((a, b) => lbTab === 'hours' ? b.hours - a.hours : b.activities - a.activities);
+  const medals = ['🥇', '🥈', '🥉'];
+
+  sorted.forEach((p, i) => {
+    const item = document.createElement('div');
+    item.className = 'lb-item' + (i < 3 ? ' top' : '') + (p.isMe ? ' me' : '');
+    const value = lbTab === 'hours' ? `${p.hours} jam` : `${p.activities} keg.`;
+    item.innerHTML = `
+      <div class="lb-rank">${i < 3 ? medals[i] : i + 1}</div>
+      <div class="lb-avatar">${p.avatar}</div>
+      <div class="lb-info">
+        <h4>${p.name}${p.isMe ? ' (Kamu)' : ''}</h4>
+        <p>${p.isMe ? 'Impact DNA: Community Changemaker' : `${lbTab === 'hours' ? p.activities + ' kegiatan' : p.hours + ' jam'}`}</p>
+      </div>
+      <div class="lb-value">${value}</div>`;
+    container.appendChild(item);
+  });
+}
+
+/* ============================================================
+   BADGES / ACHIEVEMENTS
+   ============================================================ */
+const BADGES = [
+  { id: 'first-join', icon: '🌱', name: 'Langkah Pertama', desc: 'Gabung kegiatan pertama', unlocked: true },
+  { id: 'first-checkin', icon: '📱', name: 'Hadir!', desc: 'Check-in pertama kali', unlocked: true },
+  { id: 'first-complete', icon: '🏆', name: 'Selesai!', desc: 'Selesaikan kegiatan', unlocked: true },
+  { id: 'env-hero', icon: '🌿', name: 'Pahlawan Lingkungan', desc: '3 kegiatan lingkungan', unlocked: true },
+  { id: 'edu-hero', icon: '📚', name: 'Guru Kehidupan', desc: '3 kegiatan pendidikan', unlocked: false },
+  { id: 'five-activities', icon: '⭐', name: 'Volunteer Aktif', desc: 'Selesaikan 5 kegiatan', unlocked: false },
+  { id: 'ten-activities', icon: '💎', name: 'Bintang Kehidupan', desc: 'Selesaikan 10 kegiatan', unlocked: false },
+  { id: 'hours-20', icon: '⏱️', name: 'Pengabdian Tinggi', desc: '20 jam volunteer', unlocked: true },
+  { id: 'hours-50', icon: '🔥', name: 'Dedicated Soul', desc: '50 jam volunteer', unlocked: false },
+  { id: 'multi-skill', icon: '🧩', name: 'Multi-Talenta', desc: 'Punya 5+ skill', unlocked: false },
+  { id: 'verified-fan', icon: '✅', name: 'Komunitas Lover', desc: 'Join 3 komunitas berbeda', unlocked: false },
+  { id: 'impact-share', icon: '📤', name: 'Inspirator', desc: 'Bagikan dampakmu', unlocked: false },
+];
+
+function renderBadges() {
+  const grid = document.getElementById('badgesGrid');
+  grid.innerHTML = '';
+
+  const unlockedCount = BADGES.filter(b => b.unlocked).length;
+  grid.insertAdjacentHTML('beforebegin', `<div style="padding:0 24px 16px;text-align:center"><span style="font-size:0.85rem;color:var(--gray-400)">${unlockedCount}/${BADGES.length} badge terbuka</span></div>`);
+
+  BADGES.forEach(badge => {
+    const card = document.createElement('div');
+    card.className = 'badge-card' + (badge.unlocked ? '' : ' locked');
+    card.innerHTML = `
+      <div class="badge-icon">${badge.icon}</div>
+      <div class="badge-name">${badge.name}</div>
+      <div class="badge-desc">${badge.desc}</div>`;
+    card.addEventListener('click', () => {
+      if (badge.unlocked) showToast(`${badge.icon} ${badge.name}: ${badge.desc}`, 'success');
+      else showToast('Badge ini belum terbuka', 'info');
+    });
+    grid.appendChild(card);
+  });
+}
+
+/* ============================================================
+   RATING SYSTEM
+   ============================================================ */
+function openRating(activityId) {
+  const activity = getActivityById(activityId);
+  if (!activity) return;
+  currentRatingActivity = activity;
+  currentRating = 0;
+
+  document.getElementById('ratingActivityName').textContent = activity.title;
+  document.getElementById('ratingComment').value = '';
+  document.getElementById('ratingSubmitBtn').disabled = true;
+
+  document.querySelectorAll('.rating-stars .star').forEach(s => s.classList.remove('active'));
+  document.getElementById('ratingLabel').textContent = 'Ketuk bintang untuk memberi penilaian';
+
+  previousScreen = currentScreen;
+  showScreen('rating');
+}
+
+function setRating(stars) {
+  currentRating = stars;
+  document.querySelectorAll('.rating-stars .star').forEach((s, i) => {
+    s.classList.toggle('active', i < stars);
+  });
+  const labels = ['', 'Kurang', 'Cukup', 'Bagus', 'Sangat Bagus', 'Luar Biasa! 🌟'];
+  document.getElementById('ratingLabel').textContent = labels[stars];
+  document.getElementById('ratingSubmitBtn').disabled = false;
+}
+
+function submitRating() {
+  if (!currentRatingActivity || currentRating === 0) return;
+  const reviews = JSON.parse(localStorage.getItem('volink-reviews') || '[]');
+  reviews.push({
+    activityId: currentRatingActivity.id,
+    rating: currentRating,
+    comment: document.getElementById('ratingComment').value,
+    date: new Date().toISOString(),
+  });
+  localStorage.setItem('volink-reviews', JSON.stringify(reviews));
+  showToast(`Terima kasih! Penilaian ${currentRating} bintang tersimpan`, 'success');
+  goBack();
+}
+
+/* ============================================================
+   EDIT PROFILE
+   ============================================================ */
+function openEditProfile() {
+  document.getElementById('editName').value = userProfile.name || '';
+  document.getElementById('editEmail').value = 'raka@univ.ac.id';
+
+  const causesContainer = document.getElementById('editCauses');
+  causesContainer.innerHTML = '';
+  CAUSES.forEach(c => {
+    const tag = document.createElement('span');
+    tag.className = 'edit-tag' + (userProfile.causes.includes(c.id) ? ' selected' : '');
+    tag.textContent = c.emoji + ' ' + c.label;
+    tag.addEventListener('click', () => {
+      const idx = userProfile.causes.indexOf(c.id);
+      if (idx >= 0) userProfile.causes.splice(idx, 1);
+      else userProfile.causes.push(c.id);
+      tag.classList.toggle('selected');
+    });
+    causesContainer.appendChild(tag);
+  });
+
+  const skillsContainer = document.getElementById('editSkills');
+  skillsContainer.innerHTML = '';
+  SKILLS.forEach(s => {
+    const tag = document.createElement('span');
+    tag.className = 'edit-tag' + (userProfile.skills.includes(s.id) ? ' selected' : '');
+    tag.textContent = s.emoji + ' ' + s.label;
+    tag.addEventListener('click', () => {
+      const idx = userProfile.skills.indexOf(s.id);
+      if (idx >= 0) userProfile.skills.splice(idx, 1);
+      else userProfile.skills.push(s.id);
+      tag.classList.toggle('selected');
+    });
+    skillsContainer.appendChild(tag);
+  });
+
+  previousScreen = currentScreen;
+  showScreen('edit-profile');
+}
+
+function saveProfileEdit() {
+  userProfile.name = document.getElementById('editName').value || 'Raka';
+  saveProfile();
+  showToast('Profil berhasil diperbarui!', 'success');
+  goBack();
+}
+
+/* ============================================================
+   SHARE MODAL
+   ============================================================ */
+function showShareModal() {
+  const existing = document.querySelector('.modal-overlay');
+  if (existing) existing.remove();
+
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+
+  const title = currentActivity ? currentActivity.title : 'VOLINK';
+
+  overlay.innerHTML = `
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-title">Bagikan "${title}"</div>
+      <div class="share-options">
+        <button class="share-option" onclick="shareAction('whatsapp')">
+          <div class="share-icon-wrap" style="background:#25D366;color:white">💬</div>
+          <span>WhatsApp</span>
+        </button>
+        <button class="share-option" onclick="shareAction('instagram')">
+          <div class="share-icon-wrap" style="background:linear-gradient(135deg,#833AB4,#FD1D1D,#F77737);color:white">📷</div>
+          <span>Instagram</span>
+        </button>
+        <button class="share-option" onclick="shareAction('twitter')">
+          <div class="share-icon-wrap" style="background:#1DA1F2;color:white">🐦</div>
+          <span>Twitter</span>
+        </button>
+        <button class="share-option" onclick="shareAction('copy')">
+          <div class="share-icon-wrap" style="background:var(--gray-100);color:var(--gray-600)">🔗</div>
+          <span>Salin Link</span>
+        </button>
+        <button class="share-option" onclick="shareAction('email')">
+          <div class="share-icon-wrap" style="background:#EA4335;color:white">✉️</div>
+          <span>Email</span>
+        </button>
+        <button class="share-option" onclick="shareAction('sms')">
+          <div class="share-icon-wrap" style="background:#34C759;color:white">💬</div>
+          <span>SMS</span>
+        </button>
+        <button class="share-option" onclick="shareAction('telegram')">
+          <div class="share-icon-wrap" style="background:#0088cc;color:white">✈️</div>
+          <span>Telegram</span>
+        </button>
+        <button class="share-option" onclick="shareAction('more')">
+          <div class="share-icon-wrap" style="background:var(--gray-200);color:var(--gray-600)">⋯</div>
+          <span>Lainnya</span>
+        </button>
+      </div>
+    </div>`;
+
+  document.getElementById('app').appendChild(overlay);
+}
+
+function shareAction(platform) {
+  const title = currentActivity ? currentActivity.title : 'VOLINK';
+  const text = `Yuk gabung kegiatan "${title}" di VOLINK! Connecting People, Creating Impact 💚`;
+
+  if (platform === 'copy') {
+    navigator.clipboard?.writeText(text).then(() => showToast('Link tersalin!', 'success'));
+  } else if (platform === 'whatsapp') {
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+  } else if (platform === 'twitter') {
+    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, '_blank');
+  } else if (platform === 'telegram') {
+    window.open(`https://t.me/share/url?text=${encodeURIComponent(text)}`, '_blank');
+  } else {
+    showToast('Fitur berbagi tersedia di perangkat', 'info');
+  }
+
+  document.querySelector('.modal-overlay')?.remove();
+  if (platform !== 'copy') showToast('Membuka ' + platform + '...', 'info');
+}
 
 /* ============================================================
    ONBOARDING STEPS
@@ -128,6 +532,12 @@ function renderScreen(name) {
     case 'dna': renderDNA(); break;
     case 'next-recommendation': renderNextRecommendation(); break;
     case 'checkin': renderCheckin(); break;
+    case 'favorites': renderFavorites(); break;
+    case 'leaderboard': renderLeaderboard(); break;
+    case 'badges': renderBadges(); break;
+    case 'community': break;
+    case 'rating': break;
+    case 'edit-profile': break;
   }
 }
 
@@ -139,10 +549,12 @@ function goToLogin() {
 }
 
 function skipToApp() {
+  clearInterval(splashTimer);
   const saved = localStorage.getItem('volink-profile');
   if (saved) {
     userProfile = JSON.parse(saved);
     showScreen('home');
+    showToast('Selamat datang kembali, ' + (userProfile.name || 'Raka') + '! 👋', 'success');
   } else {
     showScreen('login');
   }
@@ -481,10 +893,12 @@ function createActivityCard(activity, showFit = true, compact = false) {
   const community = getCommunity(activity.community);
   const fit = calculateFit(activity);
   const cause = CAUSES.find(c => c.id === activity.causes[0]);
+  const loc = LOCATIONS.find(l => l.id === activity.location);
 
   const card = document.createElement('div');
   card.className = 'activity-card';
   card.innerHTML = `
+    <button class="fav-btn${favorites.includes(activity.id) ? ' active' : ''}" data-id="${activity.id}" onclick="event.stopPropagation();toggleFavorite('${activity.id}')">${favorites.includes(activity.id) ? '❤️' : '🤍'}</button>
     <div class="activity-card-top">
       <div class="activity-card-icon" style="background:${cause?.color || '#16A34A'}18">${activity.image}</div>
       <div class="activity-card-info">
@@ -495,7 +909,7 @@ function createActivityCard(activity, showFit = true, compact = false) {
     </div>
     <div class="activity-card-meta">
       <span class="activity-meta-item">📅 ${formatDateShort(activity.date)}</span>
-      <span class="activity-meta-item">📍 ${LOCATIONS.find(l => l.id === activity.location)?.label || activity.location}</span>
+      <span class="activity-meta-item">📍 ${loc?.label || activity.location}</span>
       <span class="activity-meta-item">👥 ${activity.slotsFilled}/${activity.slots}</span>
     </div>
     <div class="activity-card-tags">
@@ -647,8 +1061,9 @@ function openDetail(activity) {
   document.getElementById('detailTitle').textContent = activity.title;
 
   document.getElementById('detailCommunity').innerHTML = `
-    ${community ? `<span>${community.emoji} ${community.name}</span>` : ''}
-    ${community?.verified ? '<span class="verified-badge">✅ Verified Community</span>' : '<span class="activity-tag">⚠️ Belum Terverifikasi</span>'}`;
+    ${community ? `<span style="cursor:pointer;color:var(--green)" onclick="openCommunity('${community.id}')">${community.emoji} ${community.name}</span>` : ''}
+    ${community?.verified ? '<span class="verified-badge">✅ Verified Community</span>' : '<span class="activity-tag">⚠️ Belum Terverifikasi</span>'}
+    <span style="margin-left:auto;cursor:pointer;font-size:1.1rem" onclick="showShareModal()">📤</span>`;
 
   document.getElementById('detailInfo').innerHTML = `
     <div class="detail-info-item"><div class="label">Tanggal</div><div class="value">${formatDate(activity.date)}</div></div>
@@ -819,6 +1234,7 @@ function renderCompleted() {
       </div>
       <div class="activity-item-actions">
         <button class="activity-action-btn" onclick="showScreen('passport')">Lihat Dampak</button>
+        <button class="activity-action-btn" onclick="openRating('${activity.id}')">⭐ Rating</button>
       </div>`;
     container.appendChild(item);
   });
@@ -902,6 +1318,10 @@ function renderCompletion() {
     'Dampakmu tercatat di Impact Passport. Lihat perjalanannya!',
   ];
   document.getElementById('completionMessage').textContent = messages[Math.floor(Math.random() * messages.length)];
+}
+
+function goToRating() {
+  if (currentActivity) openRating(currentActivity.id);
 }
 
 /* ============================================================
@@ -1117,4 +1537,6 @@ document.addEventListener('DOMContentLoaded', () => {
       userProfile = { ...userProfile, ...parsed };
     } catch(e) {}
   }
+
+  startSplashAnimation();
 });
