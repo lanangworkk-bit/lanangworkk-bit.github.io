@@ -359,10 +359,16 @@ function getAllActivities() {
   var legacy = ACTIVITIES.slice();
   var sharedIds = shared.map(function(o) { return o.id; });
   var merged = legacy.filter(function(a) { return sharedIds.indexOf(a.id) === -1; });
+
+  // Map category labels to cause IDs
+  var catMap = {};
+  CAUSES.forEach(function(c) { catMap[c.label.toLowerCase()] = c.id; });
+
   shared.forEach(function(o) {
+    var causeId = catMap[(o.category || '').toLowerCase()] || 'community';
     merged.push({
       id: o.id, title: o.title, community: o.communityId,
-      causes: [o.category.toLowerCase()], skills: o.skills || [],
+      causes: [causeId], skills: o.skills || [],
       skillLevel: o.skillLevel || 'pemula', activityType: o.activityTypes || ['onsite'],
       location: o.location, date: o.date, time: o.time,
       slots: o.slots, slotsFilled: o.slotsFilled || 0,

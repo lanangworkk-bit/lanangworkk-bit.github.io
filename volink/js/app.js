@@ -1038,7 +1038,7 @@ function filterHome() {
   const container = document.getElementById('homeRecommendations');
   container.innerHTML = '';
 
-  let filtered = ACTIVITIES.filter(a => {
+  let filtered = getAllActivities().filter(a => {
     const matchKeyword = !keyword || a.title.toLowerCase().includes(keyword) || a.description.toLowerCase().includes(keyword);
     const matchCause = activeCauses.length === 0 || a.causes.some(c => activeCauses.includes(c));
     return matchKeyword && matchCause;
