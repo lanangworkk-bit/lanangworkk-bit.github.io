@@ -56,7 +56,6 @@ let communityVerification = JSON.parse(localStorage.getItem('volink-community-ve
    ----------------------------------------------------------- */
 function selectRole(role) {
   currentRole = role;
-  localStorage.setItem('volink-role', role);
   if (role === 'volunteer') {
     showToast('Masuk sebagai Volunteer', 'success');
     obStep = 0;
@@ -64,18 +63,14 @@ function selectRole(role) {
     showScreen('onboarding');
   } else if (role === 'community') {
     showToast('Masuk sebagai Community Organizer', 'success');
-    if (communityProfile) {
-      showScreen('community-home');
-    } else {
-      showScreen('community-signup');
-    }
+    communityProfile = null;
+    communityOpportunities = [];
+    communityVerification = { status: 'none', step: 0 };
+    showScreen('community-signup');
   } else if (role === 'admin') {
     showToast('Masuk sebagai Admin', 'success');
-    if (isAdminLoggedIn) {
-      showScreen('admin-home');
-    } else {
-      showScreen('admin-login');
-    }
+    isAdminLoggedIn = false;
+    showScreen('admin-login');
   }
 }
 

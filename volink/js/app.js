@@ -2,6 +2,13 @@
    VOLINK — Complete App JavaScript
    ============================================================ */
 
+/* Neutralize all volink localStorage persistence */
+const _origSetItem = localStorage.setItem.bind(localStorage);
+localStorage.setItem = function(key, val) {
+  if (typeof key === 'string' && key.startsWith('volink-')) return;
+  _origSetItem(key, val);
+};
+
 /* ============================================================
    STATE
    ============================================================ */
@@ -604,26 +611,7 @@ function goToLogin() {
 
 function skipToApp() {
   clearInterval(splashTimer);
-  const role = localStorage.getItem('volink-role');
-  if (role === 'community') {
-    const cp = JSON.parse(localStorage.getItem('volink-community-profile') || 'null');
-    if (cp) { communityProfile = cp; showScreen('community-home'); }
-    else showScreen('community-signup');
-  } else if (role === 'volunteer') {
-    const saved = localStorage.getItem('volink-profile');
-    if (saved) {
-      userProfile = JSON.parse(saved);
-      showScreen('home');
-      showToast('Selamat datang kembali, ' + (userProfile.name || 'Raka') + '! 👋', 'success');
-    } else {
-      showScreen('login');
-    }
-  } else if (role === 'admin') {
-    if (isAdminLoggedIn) { showScreen('admin-home'); }
-    else showScreen('admin-login');
-  } else {
-    showScreen('role-selection');
-  }
+  showScreen('splash');
 }
 
 /* ============================================================
@@ -1659,20 +1647,22 @@ function renderProfile() {
    RESET / LOGOUT
    ============================================================ */
 function doLogout() {
-  var role = localStorage.getItem('volink-role');
-  if (role === 'admin') {
-    isAdminLoggedIn = false;
-    localStorage.removeItem('volink-admin-logged');
-  }
-  localStorage.removeItem('volink-role');
+  isAdminLoggedIn = false;
+  communityProfile = null;
+  communityOpportunities = [];
+  communityVerification = { status: 'none', step: 0 };
+  userProfile = { name: '', email: '', causes: [], skills: [], skillLevels: {}, skillLevelSingle: '', activityTypes: [], days: [], startTime: '08:00', endTime: '17:00', location: '', distance: 10, causeScores: {} };
+  currentRole = '';
   showToast('Berhasil logout', 'info');
-  showScreen('role-selection');
+  showScreen('splash');
 }
 
 function resetApp() {
-  localStorage.removeItem('volink-profile');
-  localStorage.removeItem('volink-completed');
-  localStorage.removeItem('volink-role');
+  isAdminLoggedIn = false;
+  communityProfile = null;
+  communityOpportunities = [];
+  communityVerification = { status: 'none', step: 0 };
+  userProfile = { name: '', email: '', causes: [], skills: [], skillLevels: {}, skillLevelSingle: '', activityTypes: [], days: [], startTime: '08:00', endTime: '17:00', location: '', distance: 10, causeScores: {} };
   userProfile = {
     name: 'Raka', causes: [], skills: [], skillLevels: {},
     skillLevelSingle: '', activityTypes: [], days: [],
@@ -1853,13 +1843,10 @@ function renderReviews(activityId) {
    INIT
    ============================================================ */
 document.addEventListener('DOMContentLoaded', () => {
-  const saved = localStorage.getItem('volink-profile');
-  if (saved) {
-    try {
-      const parsed = JSON.parse(saved);
-      userProfile = { ...userProfile, ...parsed };
-    } catch(e) {}
-  }
+  Object.keys(localStorage).filter(k => k.startsWith('volink-')).forEach(k => localStorage.removeItem(k));
+  userProfile = { name: '', email: '', causes: [], skills: [], skillLevels: {}, skillLevelSingle: '', activityTypes: [], days: [], startTime: '08:00', endTime: '17:00', location: '', distance: 10, causeScores: {} };
+  isAdminLoggedIn = false;
+  communityProfile = null;
 
   applyTheme();
   startSplashAnimation();
