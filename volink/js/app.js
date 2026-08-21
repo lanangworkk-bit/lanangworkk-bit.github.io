@@ -641,6 +641,11 @@ function doLogin() {
   renderOnboarding();
 }
 
+function saveLoginName() {
+  const name = document.getElementById('loginName').value;
+  if (name) userProfile.name = name;
+}
+
 /* ============================================================
    ONBOARDING
    ============================================================ */

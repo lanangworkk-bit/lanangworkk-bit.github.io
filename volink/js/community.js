@@ -59,8 +59,9 @@ function selectRole(role) {
   localStorage.setItem('volink-role', role);
   if (role === 'volunteer') {
     showToast('Masuk sebagai Volunteer', 'success');
-    const saved = localStorage.getItem('volink-profile');
-    if (saved) { showScreen('home'); } else { showScreen('onboarding'); }
+    obStep = 0;
+    userProfile = { ...userProfile, name: '', causes: [], skills: [], skillLevels: {}, skillLevelSingle: '', activityTypes: [], days: [], startTime: '08:00', endTime: '17:00', location: '', distance: 10, causeScores: {} };
+    showScreen('onboarding');
   } else if (role === 'community') {
     showToast('Masuk sebagai Community Organizer', 'success');
     if (communityProfile) {
