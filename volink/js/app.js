@@ -1112,7 +1112,7 @@ function filterExplore() {
   const list = document.getElementById('exploreList');
   list.innerHTML = '';
 
-  let filtered = [...ACTIVITIES];
+  let filtered = getAllActivities();
 
   if (exploreFilter !== 'Semua') {
     const cause = CAUSES.find(c => c.label === exploreFilter);
@@ -1258,6 +1258,12 @@ function updateConfirm() {
 function confirmJoin() {
   if (currentActivity && !joinedActivities.includes(currentActivity.id)) {
     joinedActivities.push(currentActivity.id);
+
+    // Register in shared store for community + admin visibility
+    VolinkStore.addRegistration({
+      volunteerName: userProfile.name || 'Raka',
+      activityId: currentActivity.id,
+    });
   }
 
   if (currentActivity) {
@@ -1571,7 +1577,7 @@ function renderNextRecommendation() {
   const container = document.getElementById('nextRecList');
   container.innerHTML = '';
 
-  const unjoined = ACTIVITIES.filter(a => !joinedActivities.includes(a.id));
+  const unjoined = getAllActivities().filter(a => !joinedActivities.includes(a.id));
   unjoined.sort((a, b) => calculateFit(b) - calculateFit(a));
 
   unjoined.slice(0, 3).forEach((a, i) => {
@@ -1671,7 +1677,11 @@ function renderNotifications() {
   const container = document.getElementById('notifList');
   container.innerHTML = '';
 
-  MOCK_NOTIFICATIONS.forEach(notif => {
+  // Merge shared store notifications with legacy
+  var sharedNotifs = VolinkStore.getNotifications('volunteer');
+  var allNotifs = sharedNotifs.concat(MOCK_NOTIFICATIONS);
+
+  allNotifs.forEach(notif => {
     const item = document.createElement('div');
     item.className = 'notif-item' + (notif.unread ? ' notif-unread' : '');
     item.innerHTML = `

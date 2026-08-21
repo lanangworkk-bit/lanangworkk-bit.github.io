@@ -154,9 +154,17 @@ function submitCommunitySignup() {
     return;
   }
 
-  communityProfile = { name, email, phone, location, category, description: desc, website, contactPerson: contact, emoji: '🌿', verified: false, totalActivities: 0, rating: 0, members: 0 };
+  communityProfile = { name, email, phone, location, category, description: desc, website, contactPerson: contact, emoji: '\u{1F33F}', verified: false, totalActivities: 0, rating: 0, members: 0 };
   localStorage.setItem('volink-community-profile', JSON.stringify(communityProfile));
-  showToast('Registrasi berhasil! Selamat datang 🎉', 'success');
+
+  // Register in shared store as pending (needs admin approval)
+  VolinkStore.addCommunity({
+    name: name, emoji: '\u{1F33F}', category: category, location: location,
+    contactPerson: contact, email: email, phone: phone, description: desc,
+    website: website, socialMedia: '',
+  });
+
+  showToast('Registrasi berhasil! Menunggu verifikasi admin...', 'success');
   showScreen('community-home');
 }
 
@@ -166,17 +174,28 @@ function submitCommunitySignup() {
 function renderCommunityDashboard() {
   if (!communityProfile) { showScreen('community-signup'); return; }
   
-  const activeOpps = communityOpportunities.filter(o => o.status === 'published').length;
-  const confirmed = communityOpportunities.reduce((s, o) => s + (o.confirmed || 0), 0);
-  const needed = communityOpportunities.reduce((s, o) => s + Math.max(0, (o.slots || 0) - (o.confirmed || 0)), 0);
+  // Check verification status from shared store
+  var myCommunities = VolinkStore.getCommunities();
+  var myComm = myCommunities.find(function(c) { return c.name === communityProfile.name; });
+  var verificationStatus = myComm ? myComm.status : 'unknown';
+  var isVerified = verificationStatus === 'verified';
 
-  document.getElementById('commDashGreeting').textContent = `Selamat datang, ${communityProfile.name} 👋`;
+  var myOpps = communityOpportunities;
+  var activeOpps = myOpps.filter(o => o.status === 'published' || o.status === 'pending').length;
+  var confirmed = myOpps.reduce((s, o) => s + (o.confirmed || 0), 0);
+  var needed = myOpps.reduce((s, o) => s + Math.max(0, (o.slots || 0) - (o.confirmed || 0)), 0);
+
+  document.getElementById('commDashGreeting').textContent = 'Selamat datang, ' + communityProfile.name + ' \u{1F44B}';
 
   document.getElementById('commDashStats').innerHTML = `
-    <div class="comm-stat-card"><div class="comm-stat-num">${activeOpps}</div><div class="comm-stat-label">Kegiatan Aktif</div></div>
-    <div class="comm-stat-card"><div class="comm-stat-num">${confirmed}</div><div class="comm-stat-label">Volunteer Terkonfirmasi</div></div>
-    <div class="comm-stat-card"><div class="comm-stat-num">${needed}</div><div class="comm-stat-label">Volunteer Dibutuhkan</div></div>
-    <div class="comm-stat-card"><div class="comm-stat-num">126</div><div class="comm-stat-label">Total Jam Volunteer</div></div>`;
+    <div class="comm-stat-card" style="grid-column:1/-1;background:${isVerified ? 'linear-gradient(135deg,#DCFCE7,#BBF7D0)' : 'linear-gradient(135deg,#FEF3C7,#FDE68A)'};border-color:${isVerified ? '#16A34A' : '#F59E0B'}">
+      <div class="comm-stat-num" style="font-size:0.9rem;color:${isVerified ? '#16A34A' : '#D97706'}">${isVerified ? '\u2705 Terverifikasi Admin' : '\u23F3 Menunggu Verifikasi Admin'}</div>
+      <div class="comm-stat-label">${isVerified ? 'Komunitas kamu sudah diverifikasi' : 'Status: ' + verificationStatus}</div>
+    </div>
+    <div class="comm-stat-card"><div class="comm-stat-num">${activeOpps}</div><div class="comm-stat-label">Kegiatan</div></div>
+    <div class="comm-stat-card"><div class="comm-stat-num">${confirmed}</div><div class="comm-stat-label">Volunteer</div></div>
+    <div class="comm-stat-card"><div class="comm-stat-num">${needed}</div><div class="comm-stat-label">Dibutuhkan</div></div>
+    <div class="comm-stat-card"><div class="comm-stat-num">126</div><div class="comm-stat-label">Jam Volunteer</div></div>`;
 
   document.getElementById('commDashActions').innerHTML = `
     <div class="quick-actions">
@@ -343,6 +362,27 @@ function publishOpportunity() {
     return;
   }
   const causeObj = CAUSES.find(c => c.id === createOppData.category);
+
+  // Add to shared store as pending (needs admin approval)
+  VolinkStore.addOpportunity({
+    title: createOppData.title,
+    communityId: communityProfile._id || 'c_100',
+    communityEmoji: '\u{1F33F}',
+    communityName: communityProfile.name || 'My Community',
+    category: causeObj ? causeObj.label : 'Lainnya',
+    date: createOppData.date,
+    time: (createOppData.startTime || '08:00') + ' - ' + (createOppData.endTime || '12:00'),
+    location: createOppData.location,
+    slots: parseInt(createOppData.slots) || 10,
+    description: createOppData.description,
+    skills: createOppData.skills,
+    skillLevel: 'pemula',
+    activityTypes: createOppData.activityTypes,
+    communityNeed: createOppData.communityNeed,
+    targetImpact: createOppData.targetImpact.filter(t => t.value || t.label).map(function(t) { return t.value + ' ' + t.label; }).join(', '),
+  });
+
+  // Also add to local community list
   const newOpp = {
     id: 'co-' + Date.now(),
     title: createOppData.title,
@@ -359,18 +399,17 @@ function publishOpportunity() {
     description: createOppData.description,
     targetImpact: createOppData.targetImpact.filter(t => t.value || t.label),
     skillsNeeded: createOppData.skills.map(s => SKILLS.find(sk => sk.id === s)?.label).filter(Boolean).join(', ') || 'Terbuka untuk semua',
-    image: causeObj?.emoji || '📋',
+    image: causeObj?.emoji || '\u{1F4CB}',
     communityNeed: createOppData.communityNeed,
-    status: 'published',
+    status: 'pending',
     confirmed: 0,
   };
   
   communityOpportunities.unshift(newOpp);
   localStorage.setItem('volink-community-opportunities', JSON.stringify(communityOpportunities));
-  ACTIVITIES.unshift(newOpp);
   
   createOppData = { title: '', category: '', description: '', date: '', startTime: '', endTime: '', location: '', address: '', slots: '', skills: [], activityTypes: [], communityNeed: '', targetImpact: [] };
-  showToast('Kegiatan berhasil dipublikasikan! 🎉', 'success');
+  showToast('Kegiatan dikirim untuk review admin! 📝', 'success');
   showScreen('community-opportunities');
 }
 
@@ -670,7 +709,17 @@ function renderImpactReport() {
 }
 
 function submitImpactReport() {
-  showToast('Impact report berhasil dikirim! 🎉', 'success');
+  // Add to shared store for admin review
+  VolinkStore.addImpactReport({
+    activity: currentViewActivity ? currentViewActivity.title : 'Kegiatan',
+    communityId: communityProfile._id || 'c_100',
+    communityName: communityProfile.name || 'My Community',
+    communityEmoji: '\u{1F33F}',
+    volunteers: MOCK_PARTICIPANTS['a1'] ? MOCK_PARTICIPANTS['a1'].length : 5,
+    reported: { waste: '120 kg', people: '85 orang', hours: '54 jam' },
+    target: { waste: '100 kg', people: '50 orang', hours: '60 jam' },
+  });
+  showToast('Impact report berhasil dikirim! Menunggu verifikasi admin...', 'success');
   goBack();
 }
 
@@ -747,12 +796,15 @@ function renderCommunityImpactStats() {
 function renderCommunityNotifications() {
   const container = document.getElementById('commNotifList');
   if (!container) return;
-  container.innerHTML = COMMUNITY_NOTIFICATIONS.map(n => `
-    <div class="notif-item ${n.unread ? 'notif-unread' : ''}" onclick="this.classList.remove('notif-unread')">
-      <div class="notif-icon">${n.icon}</div>
-      <div class="notif-info"><h4>${n.title}</h4><p>${n.desc}</p></div>
-      <span class="notif-time">${n.time}</span>
-    </div>`).join('');
+  var notifs = VolinkStore.getNotifications('community');
+  // Merge with legacy notifications
+  var allNotifs = notifs.concat(COMMUNITY_NOTIFICATIONS);
+  container.innerHTML = allNotifs.map(function(n) {
+    return '<div class="notif-item ' + (n.unread ? 'notif-unread' : '') + '" onclick="this.classList.remove(\'notif-unread\')">' +
+      '<div class="notif-icon">' + n.icon + '</div>' +
+      '<div class="notif-info"><h4>' + n.title + '</h4><p>' + n.desc + '</p></div>' +
+      '<span class="notif-time">' + n.time + '</span></div>';
+  }).join('');
 }
 
 /* -----------------------------------------------------------

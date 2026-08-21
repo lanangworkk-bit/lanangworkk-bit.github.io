@@ -92,54 +92,57 @@ function doAdminLogout() {
 }
 
 /* -----------------------------------------------------------
-   ADMIN OVERVIEW
+   ADMIN OVERVIEW (uses shared store)
    ----------------------------------------------------------- */
 function renderAdminOverview() {
-  const pendingVerif = MOCK_VERIFICATIONS.filter(v => v.status === 'pending').length;
-  const verifiedComm = MOCK_VERIFICATIONS.filter(v => v.status === 'verified').length;
-  const pendingOpp = MOCK_OPPORTUNITY_REVIEWS.filter(o => o.status === 'pending').length;
-  const pendingImpact = MOCK_IMPACT_VERIFICATIONS.filter(i => i.status === 'pending').length;
+  const stats = VolinkStore.getStats();
   const flaggedReports = MOCK_REPORTS.filter(r => r.status === 'needs-review').length;
-  const activeComm = MOCK_VERIFICATIONS.filter(v => v.status === 'verified').length + 5;
 
   document.getElementById('adminDashGreeting').textContent = getAdminGreeting();
 
   document.getElementById('adminDashStats').innerHTML = `
     <div class="admin-stats-grid">
-      <div class="admin-stat-mini admin-stat-pending"><div class="admin-stat-num">${pendingVerif}</div><div class="admin-stat-label">Pending Verifikasi</div></div>
-      <div class="admin-stat-mini admin-stat-verified"><div class="admin-stat-num">${verifiedComm}</div><div class="admin-stat-label">Terverifikasi</div></div>
-      <div class="admin-stat-mini admin-stat-pending"><div class="admin-stat-num">${pendingOpp}</div><div class="admin-stat-label">Pending Kegiatan</div></div>
-      <div class="admin-stat-mini admin-stat-pending"><div class="admin-stat-num">${pendingImpact}</div><div class="admin-stat-label">Laporan Impact</div></div>
+      <div class="admin-stat-mini admin-stat-pending"><div class="admin-stat-num">${stats.pendingCommunities}</div><div class="admin-stat-label">Pending Verifikasi</div></div>
+      <div class="admin-stat-mini admin-stat-verified"><div class="admin-stat-num">${stats.verifiedCommunities}</div><div class="admin-stat-label">Terverifikasi</div></div>
+      <div class="admin-stat-mini admin-stat-pending"><div class="admin-stat-num">${stats.pendingOpportunities}</div><div class="admin-stat-label">Pending Kegiatan</div></div>
+      <div class="admin-stat-mini admin-stat-pending"><div class="admin-stat-num">${stats.pendingImpactReports}</div><div class="admin-stat-label">Laporan Impact</div></div>
       <div class="admin-stat-mini admin-stat-flagged"><div class="admin-stat-num">${flaggedReports}</div><div class="admin-stat-label">Laporan Terbanyak</div></div>
-      <div class="admin-stat-mini admin-stat-verified"><div class="admin-stat-num">${activeComm}</div><div class="admin-stat-label">Komunitas Aktif</div></div>
+      <div class="admin-stat-mini admin-stat-verified"><div class="admin-stat-num">${stats.totalVolunteers}</div><div class="admin-stat-label">Total Volunteer</div></div>
     </div>`;
 
+  // Build attention queue from shared store
   const attention = [];
-  MOCK_VERIFICATIONS.filter(v => v.status === 'pending').forEach(v => attention.push({ icon: v.emoji, title: v.name, subtitle: 'Community Verification', status: 'Pending', statusType: 'pending', date: v.date, priority: v.priority, cta: 'Review', action: `reviewCommunity('${v.id}')` }));
-  MOCK_OPPORTUNITY_REVIEWS.filter(o => o.status === 'pending').forEach(o => attention.push({ icon: o.communityEmoji, title: o.title, subtitle: 'Opportunity Review', status: 'Pending Review', statusType: 'pending', date: o.date, priority: o.priority, cta: 'Review', action: `reviewOpportunity('${o.id}')` }));
-  MOCK_IMPACT_VERIFICATIONS.filter(i => i.status === 'pending').forEach(i => attention.push({ icon: i.communityEmoji, title: i.activity, subtitle: 'Impact Verification', status: 'Pending Verification', statusType: 'pending', date: i.date, priority: i.priority, cta: 'Review', action: `reviewImpact('${i.id}')` }));
-  MOCK_REPORTS.filter(r => r.status === 'needs-review').forEach(r => attention.push({ icon: '🚩', title: r.target, subtitle: r.type + ' Report', status: 'Needs Review', statusType: 'needs-revision', date: r.date, priority: r.priority, cta: 'Review', action: `reviewReport('${r.id}')` }));
+  VolinkStore.getPendingCommunities().forEach(function(v) {
+    attention.push({ icon: v.emoji, title: v.name, subtitle: 'Community Verification', statusType: 'pending', priority: 'high', action: "reviewCommunity('" + v.id + "')" });
+  });
+  VolinkStore.getPendingOpportunities().forEach(function(o) {
+    attention.push({ icon: o.communityEmoji, title: o.title, subtitle: 'Opportunity Review', statusType: 'pending', priority: 'high', action: "reviewOpportunity('" + o.id + "')" });
+  });
+  VolinkStore.getPendingImpactReports().forEach(function(i) {
+    attention.push({ icon: '\u{1F4CA}', title: i.activity, subtitle: 'Impact Verification', statusType: 'pending', priority: 'medium', action: "reviewImpactById('" + i.id + "')" });
+  });
+  MOCK_REPORTS.filter(function(r) { return r.status === 'needs-review'; }).forEach(function(r) {
+    attention.push({ icon: '\u{1F6A9}', title: r.target, subtitle: r.type + ' Report', statusType: 'needs-revision', priority: r.priority, action: "reviewReport('" + r.id + "')" });
+  });
 
-  attention.sort((a, b) => { const p = { high: 0, medium: 1, low: 2 }; return (p[a.priority] || 2) - (p[b.priority] || 2); });
+  attention.sort(function(a, b) { var p = { high: 0, medium: 1, low: 2 }; return (p[a.priority] || 2) - (p[b.priority] || 2); });
 
-  const container = document.getElementById('adminAttentionList');
+  var container = document.getElementById('adminAttentionList');
   if (attention.length === 0) {
-    container.innerHTML = `<div class="empty-state"><div class="empty-icon">✅</div><h4>Semua sudah ditinjau</h4><p>Tidak ada yang perlu perhatian saat ini</p></div>`;
+    container.innerHTML = '<div class="empty-state"><div class="empty-icon">\u2705</div><h4>Semua sudah ditinjau</h4><p>Tidak ada yang perlu perhatian saat ini</p></div>';
   } else {
-    container.innerHTML = attention.slice(0, 8).map(a => `
-      <div class="admin-attention-card" onclick="${a.action}">
-        <div class="admin-attention-left">
-          <span class="admin-attention-icon">${a.icon}</span>
-          <div>
-            <div class="admin-attention-title">${a.title}</div>
-            <div class="admin-attention-sub">${a.subtitle}</div>
-          </div>
-        </div>
-        <div class="admin-attention-right">
-          <span class="admin-attention-priority priority-${a.priority}">${a.priority}</span>
-          <button class="btn-ghost-sm" onclick="event.stopPropagation();${a.action}">${a.cta}</button>
-        </div>
-      </div>`).join('');
+    container.innerHTML = attention.slice(0, 10).map(function(a) {
+      return '<div class="admin-attention-card" onclick="' + a.action + '">' +
+        '<div class="admin-attention-left">' +
+          '<span class="admin-attention-icon">' + a.icon + '</span>' +
+          '<div><div class="admin-attention-title">' + a.title + '</div>' +
+          '<div class="admin-attention-sub">' + a.subtitle + '</div></div>' +
+        '</div>' +
+        '<div class="admin-attention-right">' +
+          '<span class="admin-attention-priority priority-' + a.priority + '">' + a.priority + '</span>' +
+          '<button class="btn-ghost-sm" onclick="event.stopPropagation();' + a.action + '">Review</button>' +
+        '</div></div>';
+    }).join('');
   }
 }
 
@@ -152,7 +155,7 @@ function getAdminGreeting() {
 }
 
 /* -----------------------------------------------------------
-   COMMUNITY VERIFICATION LIST
+   COMMUNITY VERIFICATION LIST (uses shared store)
    ----------------------------------------------------------- */
 function renderAdminVerification() {
   const container = document.getElementById('adminVerifList');
@@ -160,36 +163,39 @@ function renderAdminVerification() {
 
   renderAdminFilters('adminVerifFilters', 'verification');
 
-  let filtered = [...MOCK_VERIFICATIONS];
-  if (adminFilterStatus !== 'All') filtered = filtered.filter(v => v.status === adminFilterStatus.toLowerCase().replace(' ', '-'));
-  if (adminSearchQuery) filtered = filtered.filter(v => v.name.toLowerCase().includes(adminSearchQuery.toLowerCase()));
+  let filtered = VolinkStore.getCommunities();
+  if (adminFilterStatus !== 'All') {
+    var statusLower = adminFilterStatus.toLowerCase().replace(' ', '-');
+    filtered = filtered.filter(function(v) { return v.status === statusLower; });
+  }
+  if (adminSearchQuery) {
+    filtered = filtered.filter(function(v) { return v.name.toLowerCase().indexOf(adminSearchQuery.toLowerCase()) !== -1; });
+  }
 
   if (filtered.length === 0) {
-    container.innerHTML = `<div class="empty-state"><div class="empty-icon">✅</div><h4>Tidak ada verifikasi</h4><p>Semua komunitas sudah ditinjau</p></div>`;
+    container.innerHTML = '<div class="empty-state"><div class="empty-icon">\u2705</div><h4>Tidak ada verifikasi</h4><p>Semua komunitas sudah ditinjau</p></div>';
     return;
   }
 
-  container.innerHTML = filtered.map(v => `
-    <div class="admin-list-card" onclick="reviewCommunity('${v.id}')">
-      <div class="admin-list-left">
-        <span class="admin-list-icon">${v.emoji}</span>
-        <div>
-          <div class="admin-list-title">${v.name}</div>
-          <div class="admin-list-sub">${v.category} · ${getLocationLabel(v.location)}</div>
-        </div>
-      </div>
-      <div class="admin-list-right">
-        <span class="comm-status-badge ${v.status}">${getStatusLabel(v.status)}</span>
-        <span class="admin-list-date">${formatDateShort(v.date)}</span>
-      </div>
-    </div>`).join('');
+  container.innerHTML = filtered.map(function(v) {
+    return '<div class="admin-list-card" onclick="reviewCommunity(\'' + v.id + '\')">' +
+      '<div class="admin-list-left">' +
+        '<span class="admin-list-icon">' + v.emoji + '</span>' +
+        '<div><div class="admin-list-title">' + v.name + '</div>' +
+        '<div class="admin-list-sub">' + v.category + ' \u00B7 ' + getLocationLabel(v.location) + '</div></div>' +
+      '</div>' +
+      '<div class="admin-list-right">' +
+        '<span class="comm-status-badge ' + v.status + '">' + getStatusLabel(v.status) + '</span>' +
+        '<span class="admin-list-date">' + (v.date || '') + '</span>' +
+      '</div></div>';
+  }).join('');
 }
 
 /* -----------------------------------------------------------
-   COMMUNITY VERIFICATION DETAIL
+   COMMUNITY VERIFICATION DETAIL (uses shared store)
    ----------------------------------------------------------- */
 function reviewCommunity(id) {
-  const community = MOCK_VERIFICATIONS.find(v => v.id === id);
+  const community = VolinkStore.getCommunityById(id);
   if (!community) return;
   currentAdminActivity = community;
 
@@ -225,56 +231,43 @@ function reviewCommunity(id) {
     </div>
 
     <div class="admin-detail-section">
-      <h3>Bukti Kegiatan</h3>
-      <div class="admin-evidence-grid">
-        <div class="admin-evidence-item"><span class="admin-evidence-icon">📷</span><span>Dokumentasi Foto</span><span class="admin-evidence-status">✓ Tersedia</span></div>
-        <div class="admin-evidence-item"><span class="admin-evidence-icon">📋</span><span>Riwayat Kegiatan</span><span class="admin-evidence-status">✓ ${community.totalActivities} kegiatan</span></div>
-        <div class="admin-evidence-item"><span class="admin-evidence-icon">👥</span><span>Anggota Komunitas</span><span class="admin-evidence-status">✓ ${community.members} orang</span></div>
-      </div>
-    </div>
-
-    <div class="admin-detail-section">
       <h3>Checklist Verifikasi</h3>
       <div class="admin-checklist">
-        <label class="admin-check"><input type="checkbox" checked><span class="checkmark">✓</span> Informasi identitas</label>
-        <label class="admin-check"><input type="checkbox" checked><span class="checkmark">✓</span> Informasi organisasi</label>
-        <label class="admin-check"><input type="checkbox" checked><span class="checkmark">✓</span> Informasi kontak</label>
-        <label class="admin-check"><input type="checkbox"><span class="checkmark">✓</span> Bukti kegiatan</label>
+        <label class="admin-check"><input type="checkbox" checked><span class="checkmark">\u2713</span> Informasi identitas</label>
+        <label class="admin-check"><input type="checkbox" checked><span class="checkmark">\u2713</span> Informasi organisasi</label>
+        <label class="admin-check"><input type="checkbox" checked><span class="checkmark">\u2713</span> Informasi kontak</label>
       </div>
     </div>
 
     <div class="admin-actions">
-      <button class="btn-primary-lg" onclick="adminApproveCommunity('${community.id}')">✅ Approve</button>
-      <button class="btn-ghost" onclick="adminRevisionCommunity('${community.id}')" style="color:#D97706;border-color:#FEF3C7">🟠 Request Revision</button>
-      <button class="btn-ghost" onclick="adminRejectCommunity('${community.id}')" style="color:#EF4444;border-color:#FEE2E2">🔴 Reject</button>
+      <button class="btn-primary-lg" onclick="adminApproveCommunity('${community.id}')">\u2705 Approve</button>
+      <button class="btn-ghost" onclick="adminRevisionCommunity('${community.id}')" style="color:#D97706;border-color:#FEF3C7">\u{1F7E0} Request Revision</button>
+      <button class="btn-ghost" onclick="adminRejectCommunity('${community.id}')" style="color:#EF4444;border-color:#FEE2E2">\u{1F534} Reject</button>
     </div>`;
 
   showScreen('admin-verif-detail');
 }
 
 function adminApproveCommunity(id) {
-  const v = MOCK_VERIFICATIONS.find(x => x.id === id);
-  if (v) { v.status = 'verified'; v.verified = true; }
-  showToast('Community berhasil diverifikasi! ✅', 'success');
+  VolinkStore.updateCommunityStatus(id, 'verified');
+  showToast('Community berhasil diverifikasi! \u2705', 'success');
   goBack();
 }
 
 function adminRevisionCommunity(id) {
-  const v = MOCK_VERIFICATIONS.find(x => x.id === id);
-  if (v) v.status = 'needs-revision';
-  showToast('Revision request sent to community 🟠', 'info');
+  VolinkStore.updateCommunityStatus(id, 'needs-revision');
+  showToast('Revision request sent to community \u{1F7E0}', 'info');
   goBack();
 }
 
 function adminRejectCommunity(id) {
-  const v = MOCK_VERIFICATIONS.find(x => x.id === id);
-  if (v) v.status = 'rejected';
-  showToast('Community ditolak 🔴', 'info');
+  VolinkStore.updateCommunityStatus(id, 'rejected');
+  showToast('Community ditolak \u{1F534}', 'info');
   goBack();
 }
 
 /* -----------------------------------------------------------
-   OPPORTUNITY MODERATION LIST
+   OPPORTUNITY MODERATION LIST (uses shared store)
    ----------------------------------------------------------- */
 function renderAdminOpportunities() {
   const container = document.getElementById('adminOppList');
@@ -282,36 +275,39 @@ function renderAdminOpportunities() {
 
   renderAdminFilters('adminOppFilters', 'opportunity');
 
-  let filtered = [...MOCK_OPPORTUNITY_REVIEWS];
-  if (adminFilterStatus !== 'All') filtered = filtered.filter(o => o.status === adminFilterStatus.toLowerCase().replace(' ', '-'));
-  if (adminSearchQuery) filtered = filtered.filter(o => o.title.toLowerCase().includes(adminSearchQuery.toLowerCase()));
+  let filtered = VolinkStore.getOpportunities();
+  if (adminFilterStatus !== 'All') {
+    var statusLower = adminFilterStatus.toLowerCase().replace(' ', '-');
+    filtered = filtered.filter(function(o) { return o.status === statusLower; });
+  }
+  if (adminSearchQuery) {
+    filtered = filtered.filter(function(o) { return o.title.toLowerCase().indexOf(adminSearchQuery.toLowerCase()) !== -1; });
+  }
 
   if (filtered.length === 0) {
-    container.innerHTML = `<div class="empty-state"><div class="empty-icon">✅</div><h4>Tidak ada kegiatan</h4><p>Semua kegiatan sudah ditinjau</p></div>`;
+    container.innerHTML = '<div class="empty-state"><div class="empty-icon">\u2705</div><h4>Tidak ada kegiatan</h4><p>Semua kegiatan sudah ditinjau</p></div>';
     return;
   }
 
-  container.innerHTML = filtered.map(o => `
-    <div class="admin-list-card" onclick="reviewOpportunity('${o.id}')">
-      <div class="admin-list-left">
-        <span class="admin-list-icon">${o.communityEmoji}</span>
-        <div>
-          <div class="admin-list-title">${o.title}</div>
-          <div class="admin-list-sub">${o.community} · ${o.category}</div>
-        </div>
-      </div>
-      <div class="admin-list-right">
-        <span class="comm-status-badge ${o.status}">${getStatusLabel(o.status)}</span>
-        <span class="admin-list-date">${formatDateShort(o.date)}</span>
-      </div>
-    </div>`).join('');
+  container.innerHTML = filtered.map(function(o) {
+    return '<div class="admin-list-card" onclick="reviewOpportunity(\'' + o.id + '\')">' +
+      '<div class="admin-list-left">' +
+        '<span class="admin-list-icon">' + o.communityEmoji + '</span>' +
+        '<div><div class="admin-list-title">' + o.title + '</div>' +
+        '<div class="admin-list-sub">' + o.communityName + ' \u00B7 ' + o.category + '</div></div>' +
+      '</div>' +
+      '<div class="admin-list-right">' +
+        '<span class="comm-status-badge ' + o.status + '">' + getStatusLabel(o.status) + '</span>' +
+        '<span class="admin-list-date">' + (o.date || '') + '</span>' +
+      '</div></div>';
+  }).join('');
 }
 
 /* -----------------------------------------------------------
-   OPPORTUNITY REVIEW DETAIL
+   OPPORTUNITY REVIEW DETAIL (uses shared store)
    ----------------------------------------------------------- */
 function reviewOpportunity(id) {
-  const opp = MOCK_OPPORTUNITY_REVIEWS.find(o => o.id === id);
+  const opp = VolinkStore.getOpportunityById(id);
   if (!opp) return;
   currentAdminActivity = opp;
 
@@ -328,7 +324,7 @@ function reviewOpportunity(id) {
     <div class="admin-detail-section">
       <h3>Informasi Kegiatan</h3>
       <div class="admin-detail-grid">
-        <div class="admin-detail-item"><span class="label">Komunitas</span><span class="value">${opp.community}</span></div>
+        <div class="admin-detail-item"><span class="label">Komunitas</span><span class="value">${opp.communityName}</span></div>
         <div class="admin-detail-item"><span class="label">Kategori</span><span class="value">${opp.category}</span></div>
         <div class="admin-detail-item"><span class="label">Tanggal</span><span class="value">${formatDate(opp.date)}</span></div>
         <div class="admin-detail-item"><span class="label">Lokasi</span><span class="value">${getLocationLabel(opp.location)}</span></div>
@@ -340,53 +336,38 @@ function reviewOpportunity(id) {
 
     <div class="admin-detail-section">
       <h3>Skill yang Dibutuhkan</h3>
-      <div class="admin-detail-tags">${opp.skills.map(s => `<span class="activity-tag">${s}</span>`).join('')}</div>
-    </div>
-
-    <div class="admin-detail-section">
-      <h3>Checklist Review</h3>
-      <div class="admin-checklist">
-        <label class="admin-check"><input type="checkbox" checked><span class="checkmark">✓</span> Komunitas terverifikasi</label>
-        <label class="admin-check"><input type="checkbox" checked><span class="checkmark">✓</span> Informasi lengkap</label>
-        <label class="admin-check"><input type="checkbox"><span class="checkmark">✓</span> Lokasi valid</label>
-        <label class="admin-check"><input type="checkbox"><span class="checkmark">✓</span> Kebutuhan volunteer wajar</label>
-        <label class="admin-check"><input type="checkbox"><span class="checkmark">✓</span> Konten appropriate</label>
-        <label class="admin-check"><input type="checkbox"><span class="checkmark">✓</span> Target dampak wajar</label>
-      </div>
+      <div class="admin-detail-tags">${(opp.skills || []).map(function(s) { return '<span class="activity-tag">' + s + '</span>'; }).join('')}</div>
     </div>
 
     <div class="admin-actions">
-      <button class="btn-primary-lg" onclick="adminApproveOpp('${opp.id}')">✅ Approve</button>
-      <button class="btn-ghost" onclick="adminRevisionOpp('${opp.id}')" style="color:#D97706;border-color:#FEF3C7">🟠 Request Revision</button>
-      <button class="btn-ghost" onclick="adminRejectOpp('${opp.id}')" style="color:#EF4444;border-color:#FEE2E2">🔴 Reject</button>
+      <button class="btn-primary-lg" onclick="adminApproveOpp('${opp.id}')">\u2705 Approve</button>
+      <button class="btn-ghost" onclick="adminRevisionOpp('${opp.id}')" style="color:#D97706;border-color:#FEF3C7">\u{1F7E0} Request Revision</button>
+      <button class="btn-ghost" onclick="adminRejectOpp('${opp.id}')" style="color:#EF4444;border-color:#FEE2E2">\u{1F534} Reject</button>
     </div>`;
 
   showScreen('admin-opp-detail');
 }
 
 function adminApproveOpp(id) {
-  const o = MOCK_OPPORTUNITY_REVIEWS.find(x => x.id === id);
-  if (o) o.status = 'approved';
-  showToast('Kegiatan berhasil dipublikasikan! 🎉', 'success');
+  VolinkStore.updateOpportunityStatus(id, 'published');
+  showToast('Kegiatan berhasil dipublikasikan! \u{1F389}', 'success');
   goBack();
 }
 
 function adminRevisionOpp(id) {
-  const o = MOCK_OPPORTUNITY_REVIEWS.find(x => x.id === id);
-  if (o) o.status = 'needs-revision';
-  showToast('Revision request sent 🟠', 'info');
+  VolinkStore.updateOpportunityStatus(id, 'needs-revision');
+  showToast('Revision request sent \u{1F7E0}', 'info');
   goBack();
 }
 
 function adminRejectOpp(id) {
-  const o = MOCK_OPPORTUNITY_REVIEWS.find(x => x.id === id);
-  if (o) o.status = 'rejected';
-  showToast('Kegiatan ditolak 🔴', 'info');
+  VolinkStore.updateOpportunityStatus(id, 'rejected');
+  showToast('Kegiatan ditolak \u{1F534}', 'info');
   goBack();
 }
 
 /* -----------------------------------------------------------
-   IMPACT VERIFICATION
+   IMPACT VERIFICATION LIST (uses shared store)
    ----------------------------------------------------------- */
 function renderAdminImpact() {
   const container = document.getElementById('adminImpactList');
@@ -394,46 +375,74 @@ function renderAdminImpact() {
 
   renderAdminFilters('adminImpactFilters', 'impact');
 
-  let filtered = [...MOCK_IMPACT_VERIFICATIONS];
-  if (adminFilterStatus !== 'All') filtered = filtered.filter(i => i.status === adminFilterStatus.toLowerCase().replace(' ', '-'));
-  if (adminSearchQuery) filtered = filtered.filter(i => i.activity.toLowerCase().includes(adminSearchQuery.toLowerCase()));
+  // Combine shared store impact reports with legacy mock data
+  var sharedReports = VolinkStore.getImpactReports();
+  var legacyReports = MOCK_IMPACT_VERIFICATIONS;
+  var allReports = sharedReports.concat(legacyReports);
+
+  let filtered = allReports;
+  if (adminFilterStatus !== 'All') {
+    var statusLower = adminFilterStatus.toLowerCase().replace(' ', '-');
+    filtered = filtered.filter(function(i) { return i.status === statusLower; });
+  }
+  if (adminSearchQuery) {
+    filtered = filtered.filter(function(i) { return i.activity.toLowerCase().indexOf(adminSearchQuery.toLowerCase()) !== -1; });
+  }
 
   if (filtered.length === 0) {
-    container.innerHTML = `<div class="empty-state"><div class="empty-icon">✅</div><h4>Tidak ada impact report</h4><p>Semua laporan sudah ditinjau</p></div>`;
+    container.innerHTML = '<div class="empty-state"><div class="empty-icon">\u2705</div><h4>Tidak ada impact report</h4><p>Semua laporan sudah ditinjau</p></div>';
     return;
   }
 
-  container.innerHTML = filtered.map(i => `
-    <div class="admin-list-card" onclick="reviewImpact('${i.id}')">
-      <div class="admin-list-left">
-        <span class="admin-list-icon">${i.communityEmoji}</span>
-        <div>
-          <div class="admin-list-title">${i.activity}</div>
-          <div class="admin-list-sub">${i.community} · ${i.volunteers} volunteer</div>
-        </div>
-      </div>
-      <div class="admin-list-right">
-        <span class="comm-status-badge ${i.status}">${getStatusLabel(i.status)}</span>
-        <span class="admin-list-date">${formatDateShort(i.date)}</span>
-      </div>
-    </div>`).join('');
+  container.innerHTML = filtered.map(function(i) {
+    return '<div class="admin-list-card" onclick="reviewImpact(\'' + i.id + '\')">' +
+      '<div class="admin-list-left">' +
+        '<span class="admin-list-icon">' + (i.communityEmoji || '\u{1F4CA}') + '</span>' +
+        '<div><div class="admin-list-title">' + i.activity + '</div>' +
+        '<div class="admin-list-sub">' + (i.community || i.communityName || '') + ' \u00B7 ' + (i.volunteers || 0) + ' volunteer</div></div>' +
+      '</div>' +
+      '<div class="admin-list-right">' +
+        '<span class="comm-status-badge ' + i.status + '">' + getStatusLabel(i.status) + '</span>' +
+        '<span class="admin-list-date">' + (i.date || '') + '</span>' +
+      '</div></div>';
+  }).join('');
+}
+
+/* Review impact from shared store by ID */
+function reviewImpactById(id) {
+  var report = VolinkStore.getImpactReports().find(function(r) { return r.id === id; });
+  if (!report) {
+    // Fallback to legacy mock data
+    report = MOCK_IMPACT_VERIFICATIONS.find(function(i) { return i.id === id; });
+  }
+  if (!report) return;
+  currentAdminActivity = report;
+  renderImpactDetail(report);
+  showScreen('admin-impact-detail');
 }
 
 function reviewImpact(id) {
-  const impact = MOCK_IMPACT_VERIFICATIONS.find(i => i.id === id);
-  if (!impact) return;
-  currentAdminActivity = impact;
+  var report = VolinkStore.getImpactReports().find(function(r) { return r.id === id; });
+  if (!report) {
+    report = MOCK_IMPACT_VERIFICATIONS.find(function(i) { return i.id === id; });
+  }
+  if (!report) return;
+  currentAdminActivity = report;
+  renderImpactDetail(report);
+  showScreen('admin-impact-detail');
+}
 
+function renderImpactDetail(impact) {
   const container = document.getElementById('adminImpactDetailBody');
-  if (!container) { showScreen('admin-impact-detail'); return; }
+  if (!container) return;
 
-  const targetItems = Object.entries(impact.target).filter(([k, v]) => v !== '-');
-  const reportedItems = Object.entries(impact.reported).filter(([k, v]) => v !== '-');
-  const labels = { waste: 'Sampah terkumpul', people: 'Orang terdampak', hours: 'Jam Volunteer' };
+  var reported = impact.reported || { waste: '-', people: '-', hours: '-' };
+  var target = impact.target || { waste: '-', people: '-', hours: '-' };
+  var labels = { waste: 'Sampah terkumpul', people: 'Orang terdampak', hours: 'Jam Volunteer' };
 
   container.innerHTML = `
     <div class="admin-detail-header">
-      <span class="admin-detail-emoji">${impact.communityEmoji}</span>
+      <span class="admin-detail-emoji">${impact.communityEmoji || '\u{1F4CA}'}</span>
       <h2>${impact.activity}</h2>
       <span class="comm-status-badge ${impact.status}">${getStatusLabel(impact.status)}</span>
     </div>
@@ -441,58 +450,74 @@ function reviewImpact(id) {
     <div class="admin-detail-section">
       <h3>Target vs Aktual</h3>
       <div class="admin-comparison">
-        ${targetItems.map(([key, target]) => {
-          const actual = impact.reported[key] || '-';
-          return `<div class="admin-comparison-row">
-            <div class="admin-comparison-label">${labels[key] || key}</div>
-            <div class="admin-comparison-target"><span class="label">Target:</span> <strong>${target}</strong></div>
-            <div class="admin-comparison-actual"><span class="label">Aktual:</span> <strong class="text-green">${actual}</strong></div>
-          </div>`;
-        }).join('')}
+        <div class="admin-comparison-row">
+          <div class="admin-comparison-label">Sampah</div>
+          <div class="admin-comparison-target"><span class="label">Target:</span> <strong>${target.waste}</strong></div>
+          <div class="admin-comparison-actual"><span class="label">Aktual:</span> <strong class="text-green">${reported.waste}</strong></div>
+        </div>
+        <div class="admin-comparison-row">
+          <div class="admin-comparison-label">Orang Terdampak</div>
+          <div class="admin-comparison-target"><span class="label">Target:</span> <strong>${target.people}</strong></div>
+          <div class="admin-comparison-actual"><span class="label">Aktual:</span> <strong class="text-green">${reported.people}</strong></div>
+        </div>
+        <div class="admin-comparison-row">
+          <div class="admin-comparison-label">Jam Volunteer</div>
+          <div class="admin-comparison-target"><span class="label">Target:</span> <strong>${target.hours}</strong></div>
+          <div class="admin-comparison-actual"><span class="label">Aktual:</span> <strong class="text-green">${reported.hours}</strong></div>
+        </div>
       </div>
     </div>
 
     <div class="admin-detail-section">
       <h3>Bukti</h3>
       <div class="admin-evidence-grid">
-        <div class="admin-evidence-item"><span class="admin-evidence-icon">📷</span><span>Foto Dokumentasi</span><span class="admin-evidence-status">✓ Tersedia</span></div>
-        <div class="admin-evidence-item"><span class="admin-evidence-icon">📋</span><span>Daftar Hadir</span><span class="admin-evidence-status">✓ ${impact.volunteers} orang</span></div>
-        <div class="admin-evidence-item"><span class="admin-evidence-icon">📝</span><span>Dokumentasi Kegiatan</span><span class="admin-evidence-status">✓ Tersedia</span></div>
+        <div class="admin-evidence-item"><span class="admin-evidence-icon">\u{1F4F7}</span><span>Foto Dokumentasi</span><span class="admin-evidence-status">\u2713 Tersedia</span></div>
+        <div class="admin-evidence-item"><span class="admin-evidence-icon">\u{1F4CB}</span><span>Daftar Hadir</span><span class="admin-evidence-status">\u2713 ${(impact.volunteers || 0)} orang</span></div>
       </div>
     </div>
 
-    <div class="admin-detail-section">
-      <h3>Detail Volunteer</h3>
-      <p style="font-size:0.85rem;color:var(--gray-600)">${impact.volunteers} volunteer berkontribusi selama ${impact.reported.hours || '-'}.</p>
-    </div>
-
     <div class="admin-actions">
-      <button class="btn-primary-lg" onclick="adminVerifyImpact('${impact.id}')">✅ Verify Impact</button>
-      <button class="btn-ghost" onclick="adminRequestEvidence('${impact.id}')" style="color:#D97706;border-color:#FEF3C7">🟠 Request Evidence</button>
-      <button class="btn-ghost" onclick="adminRejectImpact('${impact.id}')" style="color:#EF4444;border-color:#FEE2E2">🔴 Reject Report</button>
+      <button class="btn-primary-lg" onclick="adminVerifyImpact('${impact.id}')">\u2705 Verify Impact</button>
+      <button class="btn-ghost" onclick="adminRequestEvidence('${impact.id}')" style="color:#D97706;border-color:#FEF3C7">\u{1F7E0} Request Evidence</button>
+      <button class="btn-ghost" onclick="adminRejectImpact('${impact.id}')" style="color:#EF4444;border-color:#FEE2E2">\u{1F534} Reject Report</button>
     </div>`;
-
-  showScreen('admin-impact-detail');
 }
 
 function adminVerifyImpact(id) {
-  const i = MOCK_IMPACT_VERIFICATIONS.find(x => x.id === id);
-  if (i) i.status = 'verified';
-  showToast('Impact berhasil diverifikasi! ✅', 'success');
+  // Try shared store first
+  var report = VolinkStore.getImpactReports().find(function(r) { return r.id === id; });
+  if (report) {
+    VolinkStore.updateImpactReportStatus(id, 'verified');
+  } else {
+    // Fallback to legacy mock
+    var legacy = MOCK_IMPACT_VERIFICATIONS.find(function(i) { return i.id === id; });
+    if (legacy) legacy.status = 'verified';
+  }
+  showToast('Impact berhasil diverifikasi! \u2705', 'success');
   goBack();
 }
 
 function adminRequestEvidence(id) {
-  const i = MOCK_IMPACT_VERIFICATIONS.find(x => x.id === id);
-  if (i) i.status = 'needs-revision';
-  showToast('Evidence request sent 🟠', 'info');
+  var report = VolinkStore.getImpactReports().find(function(r) { return r.id === id; });
+  if (report) {
+    VolinkStore.updateImpactReportStatus(id, 'needs-revision');
+  } else {
+    var legacy = MOCK_IMPACT_VERIFICATIONS.find(function(i) { return i.id === id; });
+    if (legacy) legacy.status = 'needs-revision';
+  }
+  showToast('Evidence request sent \u{1F7E0}', 'info');
   goBack();
 }
 
 function adminRejectImpact(id) {
-  const i = MOCK_IMPACT_VERIFICATIONS.find(x => x.id === id);
-  if (i) i.status = 'rejected';
-  showToast('Impact report ditolak 🔴', 'info');
+  var report = VolinkStore.getImpactReports().find(function(r) { return r.id === id; });
+  if (report) {
+    VolinkStore.updateImpactReportStatus(id, 'rejected');
+  } else {
+    var legacy = MOCK_IMPACT_VERIFICATIONS.find(function(i) { return i.id === id; });
+    if (legacy) legacy.status = 'rejected';
+  }
+  showToast('Impact report ditolak \u{1F534}', 'info');
   goBack();
 }
 
@@ -589,17 +614,20 @@ function adminEscalateReport(id) {
 }
 
 /* -----------------------------------------------------------
-   ADMIN NOTIFICATIONS
+   ADMIN NOTIFICATIONS (uses shared store)
    ----------------------------------------------------------- */
 function renderAdminNotifications() {
   const container = document.getElementById('adminNotifList');
   if (!container) return;
-  container.innerHTML = MOCK_ADMIN_NOTIFICATIONS.map(n => `
-    <div class="notif-item ${n.unread ? 'notif-unread' : ''}" onclick="this.classList.remove('notif-unread')">
-      <div class="notif-icon">${n.icon}</div>
-      <div class="notif-info"><h4>${n.title}</h4><p>${n.desc}</p></div>
-      <span class="notif-time">${n.time}</span>
-    </div>`).join('');
+  var notifs = VolinkStore.getNotifications('admin');
+  // Merge with legacy notifications
+  var allNotifs = notifs.concat(MOCK_ADMIN_NOTIFICATIONS);
+  container.innerHTML = allNotifs.map(function(n) {
+    return '<div class="notif-item ' + (n.unread ? 'notif-unread' : '') + '" onclick="this.classList.remove(\'notif-unread\')">' +
+      '<div class="notif-icon">' + n.icon + '</div>' +
+      '<div class="notif-info"><h4>' + n.title + '</h4><p>' + n.desc + '</p></div>' +
+      '<span class="notif-time">' + n.time + '</span></div>';
+  }).join('');
 }
 
 /* -----------------------------------------------------------
