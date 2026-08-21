@@ -1715,7 +1715,7 @@ function generateShareCard() {
 
   document.getElementById('shareCardPreview').innerHTML = `
     <div class="share-card-inner">
-      <div class="share-card-logo">💚 VOLINK</div>
+      <div class="share-card-logo"><img src="volink_logo.jpg" alt="VOLINK" style="width:24px;height:24px;border-radius:6px;object-fit:cover;vertical-align:middle;margin-right:4px"> VOLINK</div>
       <div class="share-card-name">${name}</div>
       <div class="share-card-dna">🧬 ${dnaName}</div>
       <div class="share-card-stats">

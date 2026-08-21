@@ -186,7 +186,7 @@ img { max-width: 100%; display: block; }
   position: relative; z-index: 1;
   margin-bottom: 24px;
 }
-.splash-logo svg { filter: drop-shadow(0 8px 24px rgba(0,0,0,0.2)); }
+.splash-logo img { filter: drop-shadow(0 8px 24px rgba(0,0,0,0.2)); }
 
 @keyframes splashPulse {
   0%, 100% { transform: scale(1); }
