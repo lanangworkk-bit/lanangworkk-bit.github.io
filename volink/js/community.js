@@ -60,7 +60,7 @@ function selectRole(role) {
   if (role === 'volunteer') {
     showToast('Masuk sebagai Volunteer', 'success');
     const saved = localStorage.getItem('volink-profile');
-    if (saved) { showScreen('home'); } else { showScreen('login'); }
+    if (saved) { showScreen('home'); } else { showScreen('onboarding'); }
   } else if (role === 'community') {
     showToast('Masuk sebagai Community Organizer', 'success');
     if (communityProfile) {
