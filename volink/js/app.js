@@ -18,7 +18,7 @@ let obStep = 0;
 let currentActivity = null;
 let currentCommunity = null;
 let joinedActivities = [];
-let favorites = JSON.parse(localStorage.getItem('volink-favorites') || '[]');
+let favorites = [];
 let currentRating = 0;
 let currentRatingActivity = null;
 
@@ -91,8 +91,6 @@ function toggleFavorite(activityId, event) {
     favorites.push(activityId);
     showToast('Ditambahkan ke bookmark', 'success');
   }
-  localStorage.setItem('volink-favorites', JSON.stringify(favorites));
-
   document.querySelectorAll('.fav-btn').forEach(btn => {
     if (btn.dataset.id === activityId) {
       btn.classList.toggle('active', favorites.includes(activityId));
@@ -301,16 +299,17 @@ function setRating(stars) {
   document.getElementById('ratingSubmitBtn').disabled = false;
 }
 
+let _volinkReviews = [];
+
 function submitRating() {
   if (!currentRatingActivity || currentRating === 0) return;
-  const reviews = JSON.parse(localStorage.getItem('volink-reviews') || '[]');
-  reviews.push({
+  _volinkReviews.push({
     activityId: currentRatingActivity.id,
     rating: currentRating,
     comment: document.getElementById('ratingComment').value,
-    date: new Date().toISOString(),
+    name: userProfile.name || 'Raka',
+    date: new Date().toISOString().split('T')[0],
   });
-  localStorage.setItem('volink-reviews', JSON.stringify(reviews));
   showToast(`Terima kasih! Penilaian ${currentRating} bintang tersimpan`, 'success');
   goBack();
 }
@@ -835,9 +834,7 @@ function calculateCauseScores() {
   });
 }
 
-function saveProfile() {
-  localStorage.setItem('volink-profile', JSON.stringify(userProfile));
-}
+function saveProfile() { }
 
 /* ============================================================
    IMPACT DNA RENDER
@@ -1257,21 +1254,10 @@ function confirmJoin() {
   if (currentActivity && !joinedActivities.includes(currentActivity.id)) {
     joinedActivities.push(currentActivity.id);
 
-    // Register in shared store for community + admin visibility
     VolinkStore.addRegistration({
       volunteerName: userProfile.name || 'Raka',
       activityId: currentActivity.id,
     });
-  }
-
-  if (currentActivity) {
-    const completed = JSON.parse(localStorage.getItem('volink-completed') || '[]');
-    completed.push({
-      activityId: currentActivity.id,
-      joinedAt: new Date().toISOString(),
-      status: 'joined',
-    });
-    localStorage.setItem('volink-completed', JSON.stringify(completed));
   }
 
   showScreen('success');
@@ -1297,24 +1283,25 @@ function renderUpcoming() {
   const container = document.getElementById('activitiesUpcoming');
   container.innerHTML = '';
 
-  const upcomingIds = joinedActivities.length > 0
-    ? joinedActivities
-    : ['a1', 'a2'];
+  const name = userProfile.name || 'Raka';
+  const regs = VolinkStore.getRegistrations().filter(r => r.volunteerName === name && r.status !== 'completed');
+  const regIds = regs.map(r => r.activityId);
+  const upcomingIds = joinedActivities.length > 0 ? [...new Set([...joinedActivities, ...regIds])] : regIds.length > 0 ? regIds : [];
 
   upcomingIds.forEach(id => {
-    const activity = getActivityById(id);
+    const activity = getAllActivities().find(a => a.id === id);
     if (!activity) return;
-    const community = getCommunity(activity.community);
-    const cause = CAUSES.find(c => c.id === activity.causes[0]);
+    const community = activity.communityName ? { emoji: activity.communityEmoji, name: activity.communityName } : getCommunity(activity.community);
+    const cause = CAUSES.find(c => c.id === (activity.causes?.[0] || activity.category?.toLowerCase()));
 
     const item = document.createElement('div');
     item.className = 'activity-item';
     item.innerHTML = `
       <div class="activity-item-top">
-        <div class="activity-item-icon" style="background:${cause?.color || '#16A34A'}18">${activity.image}</div>
+        <div class="activity-item-icon" style="background:${cause?.color || '#16A34A'}18">${activity.image || cause?.emoji || '🌿'}</div>
         <div class="activity-item-info">
           <h4>${activity.title}</h4>
-          <p>${community?.emoji} ${community?.name || ''}</p>
+          <p>${community?.emoji || ''} ${community?.name || activity.communityName || ''}</p>
         </div>
         <span class="activity-status status-confirmed">Dikonfirmasi</span>
       </div>
@@ -1324,9 +1311,7 @@ function renderUpcoming() {
         <span class="activity-meta-item">📍 ${LOCATIONS.find(l => l.id === activity.location)?.label || ''}</span>
       </div>
       <div class="activity-item-actions">
-        <button class="activity-action-btn" onclick="openDetail(getActivityById('${id}'))">Detail</button>
-        <button class="activity-action-btn">📍 Arah</button>
-        <button class="activity-action-btn">📞 Kontak</button>
+        <button class="activity-action-btn" onclick="openDetail(getActivityById('${id}') || getAllActivities().find(a=>a.id==='${id}'))">Detail</button>
         <button class="activity-action-btn primary" onclick="startCheckin('${id}')">Check-in</button>
       </div>`;
     container.appendChild(item);
@@ -1341,29 +1326,29 @@ function renderCompleted() {
   const container = document.getElementById('activitiesCompleted');
   container.innerHTML = '';
 
-  const completedData = JSON.parse(localStorage.getItem('volink-completed') || '[]');
-  const pastActivities = MOCK_IMPACT_HISTORY.slice(0, 4);
+  const name = userProfile.name || 'Raka';
+  const regs = VolinkStore.getRegistrations().filter(r => r.volunteerName === name && r.checkedIn);
+  const completedIds = regs.map(r => r.activityId);
 
-  pastActivities.forEach(p => {
-    const activity = getActivityById(p.activityId);
+  completedIds.forEach(id => {
+    const activity = getAllActivities().find(a => a.id === id);
     if (!activity) return;
-    const community = getCommunity(activity.community);
-    const cause = CAUSES.find(c => c.id === activity.causes[0]);
+    const community = activity.communityName ? { emoji: activity.communityEmoji, name: activity.communityName } : getCommunity(activity.community);
+    const cause = CAUSES.find(c => c.id === (activity.causes?.[0] || activity.category?.toLowerCase()));
 
     const item = document.createElement('div');
     item.className = 'activity-item';
     item.innerHTML = `
       <div class="activity-item-top">
-        <div class="activity-item-icon" style="background:${cause?.color || '#16A34A'}18">${activity.image}</div>
+        <div class="activity-item-icon" style="background:${cause?.color || '#16A34A'}18">${activity.image || cause?.emoji || '🌿'}</div>
         <div class="activity-item-info">
           <h4>${activity.title}</h4>
-          <p>${community?.emoji} ${community?.name || ''}</p>
+          <p>${community?.emoji || ''} ${community?.name || activity.communityName || ''}</p>
         </div>
         <span class="activity-status status-completed">Selesai</span>
       </div>
       <div class="activity-item-meta">
-        <span class="activity-meta-item">📅 ${formatDate(p.date)}</span>
-        <span class="activity-meta-item">⏱️ ${p.hours} jam</span>
+        <span class="activity-meta-item">📅 ${formatDate(activity.date)}</span>
       </div>
       <div class="activity-item-actions">
         <button class="activity-action-btn" onclick="showScreen('passport')">Lihat Dampak</button>
@@ -1416,6 +1401,10 @@ function renderCheckin() {
 }
 
 function doCheckin() {
+  if (currentActivity) {
+    VolinkStore.checkInVolunteer(userProfile.name || 'Raka', currentActivity.id);
+  }
+
   document.getElementById('checkinStatus').className = 'checkin-status success';
   document.getElementById('checkinStatus').innerHTML = '✅ Berhasil Check-in!';
   document.getElementById('checkinBtn').style.display = 'none';
@@ -1794,7 +1783,7 @@ function generateShareCard() {
 /* ============================================================
    DARK MODE
    ============================================================ */
-let isDarkMode = localStorage.getItem('volink-theme') === 'dark';
+let isDarkMode = false;
 
 function toggleDarkMode() {
   isDarkMode = !isDarkMode;
@@ -1817,18 +1806,18 @@ const MOCK_REVIEWS = [
 ];
 
 function renderReviews(activityId) {
-  const reviews = MOCK_REVIEWS;
-  if (reviews.length === 0) return '';
+  const allReviews = [..._volinkReviews.filter(r => !activityId || r.activityId === activityId), ...MOCK_REVIEWS];
+  if (allReviews.length === 0) return '';
 
   return `
     <div class="detail-section">
-      <h3>Review Volunteer (${reviews.length})</h3>
-      ${reviews.map(r => `
+      <h3>Review Volunteer (${allReviews.length})</h3>
+      ${allReviews.slice(0, 10).map(r => `
         <div class="review-item">
           <div class="review-header">
-            <span class="review-avatar">${r.avatar}</span>
+            <span class="review-avatar">${r.avatar || '🧑'}</span>
             <div>
-              <div class="review-name">${r.name}</div>
+              <div class="review-name">${r.name || 'Anonymous'}</div>
               <div class="review-stars">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</div>
             </div>
             <span class="review-date">${formatDateShort(r.date)}</span>

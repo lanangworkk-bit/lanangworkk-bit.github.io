@@ -5,7 +5,7 @@
 /* -----------------------------------------------------------
    STATE
    ----------------------------------------------------------- */
-let isAdminLoggedIn = JSON.parse(localStorage.getItem('volink-admin-logged') || 'false');
+let isAdminLoggedIn = false;
 let adminFilterStatus = 'All';
 let adminFilterType = 'All';
 let adminFilterPriority = 'All';
@@ -76,7 +76,6 @@ function doAdminLogin() {
   const pass = document.getElementById('adminPass')?.value;
   if (email === 'admin@volink.id' && pass === 'admin123') {
     isAdminLoggedIn = true;
-    localStorage.setItem('volink-admin-logged', 'true');
     showToast('Selamat datang, Admin! 👋', 'success');
     showScreen('admin-home');
   } else {
@@ -86,10 +85,8 @@ function doAdminLogin() {
 
 function doAdminLogout() {
   isAdminLoggedIn = false;
-  localStorage.removeItem('volink-admin-logged');
-  localStorage.removeItem('volink-role');
   showToast('Berhasil logout', 'info');
-  showScreen('role-selection');
+  showScreen('splash');
 }
 
 /* -----------------------------------------------------------

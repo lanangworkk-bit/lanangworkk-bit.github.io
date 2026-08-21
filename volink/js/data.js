@@ -4,11 +4,11 @@
    ============================================================ */
 
 /* -----------------------------------------------------------
-   SHARED DATA STORE (localStorage backed)
+   SHARED DATA STORE (in-memory)
    ----------------------------------------------------------- */
-const VolinkStore = {
-  _key: 'volink-shared-store',
+let _volinkStoreData = null;
 
+const VolinkStore = {
   _default() {
     return {
       communities: [
@@ -61,20 +61,17 @@ const VolinkStore = {
   },
 
   load() {
-    try {
-      const raw = localStorage.getItem(this._key);
-      if (raw) return JSON.parse(raw);
-    } catch (e) { /* use default */ }
-    return this._default();
+    if (!_volinkStoreData) _volinkStoreData = this._default();
+    return _volinkStoreData;
   },
 
   save(data) {
-    localStorage.setItem(this._key, JSON.stringify(data));
+    _volinkStoreData = data;
   },
 
   reset() {
-    localStorage.removeItem(this._key);
-    return this._default();
+    _volinkStoreData = this._default();
+    return _volinkStoreData;
   },
 
   /* --- Communities --- */

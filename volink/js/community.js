@@ -5,8 +5,8 @@
 /* -----------------------------------------------------------
    STATE
    ----------------------------------------------------------- */
-let currentRole = localStorage.getItem('volink-role') || '';
-let communityProfile = JSON.parse(localStorage.getItem('volink-community-profile') || 'null');
+let currentRole = '';
+let communityProfile = null;
 let currentCreateStep = 0;
 let createOppData = { title: '', category: '', description: '', date: '', startTime: '', endTime: '', location: '', address: '', slots: '', skills: [], activityTypes: [], communityNeed: '', targetImpact: [] };
 let currentViewActivity = null;
@@ -14,7 +14,7 @@ let currentViewVolunteer = null;
 let communityOppFilter = 'Semua';
 let participantTab = 'Confirmed';
 let verificationStep = 0;
-let communityOpportunities = JSON.parse(localStorage.getItem('volink-community-opportunities') || '[]');
+let communityOpportunities = [];
 
 // Mock volunteers for matching
 const MOCK_VOLUNTEERS = [
@@ -49,7 +49,7 @@ const MOCK_PARTICIPANTS = {
 };
 
 // Verification data
-let communityVerification = JSON.parse(localStorage.getItem('volink-community-verification') || '{"status":"none","step":0}');
+let communityVerification = { status: 'none', step: 0 };
 
 /* -----------------------------------------------------------
    ROLE SELECTION
@@ -150,15 +150,13 @@ function submitCommunitySignup() {
     return;
   }
 
-  communityProfile = { name, email, phone, location, category, description: desc, website, contactPerson: contact, emoji: '\u{1F33F}', verified: false, totalActivities: 0, rating: 0, members: 0 };
-  localStorage.setItem('volink-community-profile', JSON.stringify(communityProfile));
-
-  // Register in shared store as pending (needs admin approval)
-  VolinkStore.addCommunity({
+  const storeComm = VolinkStore.addCommunity({
     name: name, emoji: '\u{1F33F}', category: category, location: location,
     contactPerson: contact, email: email, phone: phone, description: desc,
     website: website, socialMedia: '',
   });
+
+  communityProfile = { name, email, phone, location, category, description: desc, website, contactPerson: contact, emoji: '\u{1F33F}', verified: false, totalActivities: 0, rating: 0, members: 0, _id: storeComm.id };
 
   showToast('Registrasi berhasil! Menunggu verifikasi admin...', 'success');
   showScreen('community-home');
@@ -170,16 +168,17 @@ function submitCommunitySignup() {
 function renderCommunityDashboard() {
   if (!communityProfile) { showScreen('community-signup'); return; }
   
-  // Check verification status from shared store
   var myCommunities = VolinkStore.getCommunities();
   var myComm = myCommunities.find(function(c) { return c.name === communityProfile.name; });
   var verificationStatus = myComm ? myComm.status : 'unknown';
   var isVerified = verificationStatus === 'verified';
+  communityProfile._id = myComm ? myComm.id : communityProfile._id;
 
-  var myOpps = communityOpportunities;
+  var myOpps = VolinkStore.getOpportunities().filter(o => o.communityId === communityProfile._id);
   var activeOpps = myOpps.filter(o => o.status === 'published' || o.status === 'pending').length;
-  var confirmed = myOpps.reduce((s, o) => s + (o.confirmed || 0), 0);
-  var needed = myOpps.reduce((s, o) => s + Math.max(0, (o.slots || 0) - (o.confirmed || 0)), 0);
+  var allRegs = VolinkStore.getRegistrations();
+  var confirmed = allRegs.filter(r => myOpps.some(o => o.id === r.activityId)).length;
+  var needed = myOpps.reduce((s, o) => s + Math.max(0, (o.slots || 0) - (o.slotsFilled || 0)), 0);
 
   document.getElementById('commDashGreeting').textContent = 'Selamat datang, ' + communityProfile.name + ' \u{1F44B}';
 
@@ -202,17 +201,17 @@ function renderCommunityDashboard() {
     </div>`;
 
   const oppContainer = document.getElementById('commDashOpps');
-  if (communityOpportunities.length === 0) {
+  if (myOpps.length === 0) {
     oppContainer.innerHTML = `<div class="empty-state"><div class="empty-icon">📋</div><h4>Belum ada kegiatan</h4><p>Mulai buat kegiatan pertamamu</p><button class="btn-primary-lg" onclick="showScreen('community-create-opportunity')" style="margin-top:12px">Buat Kegiatan →</button></div>`;
   } else {
-    oppContainer.innerHTML = communityOpportunities.slice(0, 3).map(o => `
+    oppContainer.innerHTML = myOpps.slice(0, 5).map(o => `
       <div class="comm-opp-card" onclick="showScreen('community-activity-live');renderActivityManagement('${o.id}')">
         <div class="comm-opp-top">
           <span class="comm-opp-title">${o.title}</span>
           <span class="comm-status-badge ${o.status}">${getStatusLabel(o.status)}</span>
         </div>
         <div class="comm-opp-meta">📅 ${formatDateShort(o.date)} · 📍 ${getLocationLabel(o.location)}</div>
-        <div class="comm-opp-volunteers">👥 ${o.confirmed || 0}/${o.slots} volunteer</div>
+        <div class="comm-opp-volunteers">👥 ${o.slotsFilled || 0}/${o.slots} volunteer</div>
         ${o.communityNeed ? `<div class="comm-opp-need"><img src="volink_logo.jpg" alt="VOLINK" style="width:14px;height:14px;border-radius:4px;object-fit:cover;vertical-align:middle"> ${o.communityNeed}</div>` : ''}
       </div>`).join('');
   }
@@ -359,11 +358,10 @@ function publishOpportunity() {
   }
   const causeObj = CAUSES.find(c => c.id === createOppData.category);
 
-  // Add to shared store as pending (needs admin approval)
-  VolinkStore.addOpportunity({
+  const storeOpp = VolinkStore.addOpportunity({
     title: createOppData.title,
     communityId: communityProfile._id || 'c_100',
-    communityEmoji: '\u{1F33F}',
+    communityEmoji: communityProfile.emoji || '\u{1F33F}',
     communityName: communityProfile.name || 'My Community',
     category: causeObj ? causeObj.label : 'Lainnya',
     date: createOppData.date,
@@ -378,32 +376,6 @@ function publishOpportunity() {
     targetImpact: createOppData.targetImpact.filter(t => t.value || t.label).map(function(t) { return t.value + ' ' + t.label; }).join(', '),
   });
 
-  // Also add to local community list
-  const newOpp = {
-    id: 'co-' + Date.now(),
-    title: createOppData.title,
-    community: communityProfile?.name || 'My Community',
-    causes: createOppData.category ? [createOppData.category] : [],
-    skills: createOppData.skills,
-    skillLevel: 'pemula',
-    activityType: createOppData.activityTypes,
-    location: createOppData.location,
-    date: createOppData.date,
-    time: (createOppData.startTime || '08:00') + ' - ' + (createOppData.endTime || '12:00'),
-    slots: parseInt(createOppData.slots) || 10,
-    slotsFilled: 0,
-    description: createOppData.description,
-    targetImpact: createOppData.targetImpact.filter(t => t.value || t.label),
-    skillsNeeded: createOppData.skills.map(s => SKILLS.find(sk => sk.id === s)?.label).filter(Boolean).join(', ') || 'Terbuka untuk semua',
-    image: causeObj?.emoji || '\u{1F4CB}',
-    communityNeed: createOppData.communityNeed,
-    status: 'pending',
-    confirmed: 0,
-  };
-  
-  communityOpportunities.unshift(newOpp);
-  localStorage.setItem('volink-community-opportunities', JSON.stringify(communityOpportunities));
-  
   createOppData = { title: '', category: '', description: '', date: '', startTime: '', endTime: '', location: '', address: '', slots: '', skills: [], activityTypes: [], communityNeed: '', targetImpact: [] };
   showToast('Kegiatan dikirim untuk review admin! 📝', 'success');
   showScreen('community-opportunities');
@@ -426,7 +398,7 @@ function renderCommunityOpportunities() {
     tabs.appendChild(btn);
   });
 
-  let filtered = [...communityOpportunities];
+  let filtered = VolinkStore.getOpportunities().filter(o => o.communityId === communityProfile._id);
   if (communityOppFilter !== 'Semua') {
     const statusMap = { 'Published': 'published', 'Draft': 'draft', 'Selesai': 'completed' };
     filtered = filtered.filter(o => o.status === statusMap[communityOppFilter]);
@@ -445,13 +417,13 @@ function renderCommunityOpportunities() {
       </div>
       <div class="comm-opp-meta">📅 ${formatDateShort(o.date)} · 📍 ${getLocationLabel(o.location)} · ⏰ ${o.time}</div>
       <div class="comm-opp-slots">
-        <div class="slots-bar"><div class="slots-fill" style="width:${((o.confirmed || 0) / (o.slots || 1)) * 100}%"></div></div>
-        <span>${o.confirmed || 0}/${o.slots} volunteer</span>
+        <div class="slots-bar"><div class="slots-fill" style="width:${((o.slotsFilled || 0) / (o.slots || 1)) * 100}%"></div></div>
+        <span>${o.slotsFilled || 0}/${o.slots} volunteer</span>
       </div>
       ${o.communityNeed ? `<div class="comm-opp-need">💚 ${o.communityNeed}</div>` : ''}
       <div class="comm-opp-actions">
-        <button class="btn-ghost-sm" onclick="event.stopPropagation();currentViewActivity=getActivityById('${o.id}')||communityOpportunities.find(x=>x.id==='${o.id}');showScreen('community-find-volunteers')">🔍 Cari Volunteer</button>
-        <button class="btn-ghost-sm" onclick="event.stopPropagation();currentViewActivity=getActivityById('${o.id}')||communityOpportunities.find(x=>x.id==='${o.id}');showScreen('community-participants')">👥 Peserta</button>
+        <button class="btn-ghost-sm" onclick="event.stopPropagation();currentViewActivity=VolinkStore.getOpportunityById('${o.id}');showScreen('community-find-volunteers')">🔍 Cari Volunteer</button>
+        <button class="btn-ghost-sm" onclick="event.stopPropagation();currentViewActivity=VolinkStore.getOpportunityById('${o.id}');showScreen('community-participants')">👥 Peserta</button>
       </div>
     </div>`).join('');
 }
@@ -577,7 +549,7 @@ function renderParticipants() {
   if (!container) return;
   const tabs = document.getElementById('participantTabs');
   tabs.innerHTML = '';
-  ['Confirmed', 'Pending', 'Waitlist', 'Completed'].forEach(t => {
+  ['Confirmed', 'Pending', 'Completed'].forEach(t => {
     const btn = document.createElement('button');
     btn.className = 'tab-pill' + (participantTab === t ? ' active' : '');
     btn.textContent = t;
@@ -585,9 +557,11 @@ function renderParticipants() {
     tabs.appendChild(btn);
   });
 
-  const actId = currentViewActivity?.id || 'a1';
-  const participants = MOCK_PARTICIPANTS[actId] || MOCK_PARTICIPANTS['a1'];
-  const filtered = participants.filter(p => p.status === participantTab);
+  const actId = currentViewActivity?.id;
+  const allRegs = VolinkStore.getRegistrations();
+  const actRegs = actId ? allRegs.filter(r => r.activityId === actId) : allRegs;
+  const tabMap = { 'Confirmed': 'confirmed', 'Pending': 'pending', 'Completed': 'completed' };
+  const filtered = actRegs.filter(p => p.status === tabMap[participantTab]);
 
   if (filtered.length === 0) {
     container.innerHTML = `<div class="empty-state"><div class="empty-icon">👥</div><h4>Belum ada peserta</h4><p>Volunteer ${participantTab.toLowerCase()} akan muncul di sini</p></div>`;
@@ -597,10 +571,10 @@ function renderParticipants() {
   container.innerHTML = filtered.map(p => `
     <div class="comm-participant-card">
       <div class="comm-participant-left">
-        <span class="comm-participant-avatar">${p.avatar}</span>
+        <span class="comm-participant-avatar">🧑</span>
         <div>
-          <div class="comm-participant-name">${p.name}</div>
-          <div class="comm-participant-meta">${p.fit}% Impact Fit · ${p.status}</div>
+          <div class="comm-participant-name">${p.volunteerName}</div>
+          <div class="comm-participant-meta">${p.status}</div>
         </div>
       </div>
       <div class="comm-participant-status">
@@ -613,13 +587,13 @@ function renderParticipants() {
    ACTIVITY MANAGEMENT (Live)
    ----------------------------------------------------------- */
 function renderActivityManagement(activityId) {
-  const activity = communityOpportunities.find(o => o.id === activityId) || getActivityById(activityId);
+  const activity = VolinkStore.getOpportunityById(activityId) || getActivityById(activityId);
   if (!activity) return;
   currentViewActivity = activity;
 
-  const participants = MOCK_PARTICIPANTS[activityId] || MOCK_PARTICIPANTS['a1'];
-  const checkedIn = participants.filter(p => p.checkedIn).length;
-  const total = participants.length;
+  const regs = VolinkStore.getRegistrations().filter(r => r.activityId === activityId);
+  const checkedIn = regs.filter(r => r.checkedIn).length;
+  const total = regs.length;
 
   document.getElementById('liveActTitle').textContent = activity.title;
   document.getElementById('liveActProgress').style.width = (total > 0 ? (checkedIn / total * 100) : 0) + '%';
@@ -628,9 +602,7 @@ function renderActivityManagement(activityId) {
 
   document.getElementById('liveActActions').innerHTML = `
     <button class="btn-ghost" onclick="showScreen('community-participants')">👥 Lihat Peserta</button>
-    <button class="btn-ghost" onclick="showToast('Pengumuman terkirim! 📢','success')">📢 Kirim Pengumuman</button>
-    <button class="btn-ghost" onclick="showScreen('community-impact-report')">📊 Impact Report</button>
-    <button class="btn-ghost" onclick="showToast('Kegiatan ditutup','info');">🔒 Tutup Kegiatan</button>`;
+    <button class="btn-ghost" onclick="showScreen('community-impact-report')">📊 Impact Report</button>`;
 }
 
 /* -----------------------------------------------------------
@@ -639,29 +611,27 @@ function renderActivityManagement(activityId) {
 function renderAttendance() {
   const container = document.getElementById('attendanceList');
   if (!container) return;
-  const actId = currentViewActivity?.id || 'a1';
-  const participants = MOCK_PARTICIPANTS[actId] || MOCK_PARTICIPANTS['a1'];
-  const checkedIn = participants.filter(p => p.checkedIn).length;
-  const pending = participants.filter(p => !p.checkedIn && p.status === 'Confirmed').length;
-  const absent = participants.filter(p => !p.checkedIn && p.status !== 'Confirmed').length;
+  const actId = currentViewActivity?.id;
+  const regs = actId ? VolinkStore.getRegistrations().filter(r => r.activityId === actId) : [];
+  const checkedIn = regs.filter(p => p.checkedIn).length;
+  const pending = regs.filter(p => !p.checkedIn).length;
 
   document.getElementById('attendanceSummary').innerHTML = `
     <div class="comm-stat-card"><div class="comm-stat-num">${checkedIn}</div><div class="comm-stat-label">Checked-in</div></div>
     <div class="comm-stat-card"><div class="comm-stat-num">${pending}</div><div class="comm-stat-label">Pending</div></div>
-    <div class="comm-stat-card"><div class="comm-stat-num">${absent}</div><div class="comm-stat-label">Absent</div></div>
-    <div class="comm-stat-card"><div class="comm-stat-num">${participants.length}</div><div class="comm-stat-label">Total Confirmed</div></div>`;
+    <div class="comm-stat-card"><div class="comm-stat-num">${regs.length}</div><div class="comm-stat-label">Total Terdaftar</div></div>`;
 
-  container.innerHTML = participants.map(p => `
+  container.innerHTML = regs.map(p => `
     <div class="comm-participant-card">
       <div class="comm-participant-left">
-        <span class="comm-participant-avatar">${p.avatar}</span>
+        <span class="comm-participant-avatar">🧑</span>
         <div>
-          <div class="comm-participant-name">${p.name}</div>
-          <div class="comm-participant-meta">${p.fit}% Fit</div>
+          <div class="comm-participant-name">${p.volunteerName}</div>
+          <div class="comm-participant-meta">${p.status}</div>
         </div>
       </div>
       <div class="comm-participant-status">
-        ${p.checkedIn ? '<span class="checkin-badge checked">✓ Checked-in</span>' : '<span class="checkin-badge pending">Not checked-in</span>'}
+        ${p.checkedIn ? '<span class="checkin-badge checked">✓ Checked-in</span>' : '<span class="checkin-badge pending">Belum check-in</span>'}
       </div>
     </div>`).join('');
 }
@@ -705,15 +675,29 @@ function renderImpactReport() {
 }
 
 function submitImpactReport() {
-  // Add to shared store for admin review
+  const actId = currentViewActivity?.id;
+  const activity = currentViewActivity;
+  const targets = activity?.targetImpact || [];
+  const reported = {};
+  targets.forEach((t, i) => {
+    const el = document.getElementById('actualVal' + i);
+    reported[t.label] = el ? el.value : t.value;
+  });
+  const hoursEl = document.getElementById('actualHours');
+  reported['Jam Volunteer'] = hoursEl ? hoursEl.value + ' jam' : '0 jam';
+  const summaryEl = document.getElementById('impactSummary');
+
+  const regs = actId ? VolinkStore.getRegistrations().filter(r => r.activityId === actId && r.checkedIn) : [];
+
   VolinkStore.addImpactReport({
-    activity: currentViewActivity ? currentViewActivity.title : 'Kegiatan',
+    activity: activity ? activity.title : 'Kegiatan',
     communityId: communityProfile._id || 'c_100',
     communityName: communityProfile.name || 'My Community',
-    communityEmoji: '\u{1F33F}',
-    volunteers: MOCK_PARTICIPANTS['a1'] ? MOCK_PARTICIPANTS['a1'].length : 5,
-    reported: { waste: '120 kg', people: '85 orang', hours: '54 jam' },
-    target: { waste: '100 kg', people: '50 orang', hours: '60 jam' },
+    communityEmoji: communityProfile.emoji || '\u{1F33F}',
+    volunteers: regs.length || 1,
+    reported: reported,
+    target: targets.reduce((acc, t) => { acc[t.label] = t.value; return acc; }, {}),
+    summary: summaryEl ? summaryEl.value : '',
   });
   showToast('Impact report berhasil dikirim! Menunggu verifikasi admin...', 'success');
   goBack();
@@ -727,16 +711,21 @@ let verifiedVolunteers = {};
 function renderImpactVerification() {
   const container = document.getElementById('impactVerifyList');
   if (!container) return;
-  const actId = currentViewActivity?.id || 'a1';
-  const participants = MOCK_PARTICIPANTS[actId] || MOCK_PARTICIPANTS['a1'];
+  const actId = currentViewActivity?.id;
+  const regs = actId ? VolinkStore.getRegistrations().filter(r => r.activityId === actId && r.checkedIn) : [];
 
-  container.innerHTML = participants.map((p, i) => `
+  if (regs.length === 0) {
+    container.innerHTML = '<div class="empty-state"><div class="empty-icon">📊</div><h4>Belum ada data</h4><p>Volunteer yang sudah check-in akan muncul di sini</p></div>';
+    return;
+  }
+
+  container.innerHTML = regs.map((p, i) => `
     <div class="comm-participant-card">
       <div class="comm-participant-left">
-        <span class="comm-participant-avatar">${p.avatar}</span>
+        <span class="comm-participant-avatar">🧑</span>
         <div>
-          <div class="comm-participant-name">${p.name}</div>
-          <div class="comm-participant-meta">3 jam · 12 kg sampah terkumpul</div>
+          <div class="comm-participant-name">${p.volunteerName}</div>
+          <div class="comm-participant-meta">${p.status === 'completed' ? 'Check-in selesai' : 'Sudah hadir'}</div>
         </div>
       </div>
       <div class="comm-participant-status">
@@ -758,12 +747,20 @@ function renderCommunityImpactStats() {
   const container = document.getElementById('commImpactStatsBody');
   if (!container) return;
 
+  var myOpps = communityProfile._id ? VolinkStore.getOpportunities().filter(o => o.communityId === communityProfile._id) : [];
+  var totalOpps = myOpps.length;
+  var totalSlots = myOpps.reduce((s, o) => s + (o.slots || 0), 0);
+  var totalFilled = myOpps.reduce((s, o) => s + (o.slotsFilled || 0), 0);
+  var allReports = VolinkStore.getImpactReports().filter(r => r.communityId === communityProfile._id);
+  var verifiedReports = allReports.filter(r => r.status === 'verified').length;
+  var achievedPct = allReports.length > 0 ? Math.round((verifiedReports / allReports.length) * 100) : 0;
+
   container.innerHTML = `
     <div class="comm-stat-grid">
-      <div class="comm-stat-card"><div class="comm-stat-num">${communityOpportunities.length || 48}</div><div class="comm-stat-label">Total Kegiatan</div></div>
-      <div class="comm-stat-card"><div class="comm-stat-num">126</div><div class="comm-stat-label">Jam Volunteer</div></div>
-      <div class="comm-stat-card"><div class="comm-stat-num">1.2K</div><div class="comm-stat-label">People Reached</div></div>
-      <div class="comm-stat-card"><div class="comm-stat-num">95%</div><div class="comm-stat-label">Impact Achieved</div></div>
+      <div class="comm-stat-card"><div class="comm-stat-num">${totalOpps}</div><div class="comm-stat-label">Total Kegiatan</div></div>
+      <div class="comm-stat-card"><div class="comm-stat-num">${totalSlots}</div><div class="comm-stat-label">Total Slots</div></div>
+      <div class="comm-stat-card"><div class="comm-stat-num">${totalFilled}</div><div class="comm-stat-label">Volunteer Terdaftar</div></div>
+      <div class="comm-stat-card"><div class="comm-stat-num">${achievedPct}%</div><div class="comm-stat-label">Impact Achieved</div></div>
     </div>
     <div class="comm-section">
       <h3>Dampak per Kategori</h3>
@@ -832,7 +829,19 @@ function saveCommunityProfile() {
   communityProfile.phone = document.getElementById('cpPhone')?.value || communityProfile.phone;
   communityProfile.description = document.getElementById('cpDesc')?.value || '';
   communityProfile.website = document.getElementById('cpWebsite')?.value || '';
-  localStorage.setItem('volink-community-profile', JSON.stringify(communityProfile));
+
+  if (communityProfile._id) {
+    const store = VolinkStore.load();
+    const idx = store.communities.findIndex(c => c.id === communityProfile._id);
+    if (idx >= 0) {
+      store.communities[idx].name = communityProfile.name;
+      store.communities[idx].email = communityProfile.email;
+      store.communities[idx].phone = communityProfile.phone;
+      store.communities[idx].description = communityProfile.description;
+      store.communities[idx].website = communityProfile.website;
+      VolinkStore.save(store);
+    }
+  }
   showToast('Profil berhasil diperbarui!', 'success');
 }
 
@@ -891,7 +900,9 @@ function verificationNext() {
 
 function submitVerification() {
   communityVerification.status = 'pending';
-  localStorage.setItem('volink-community-verification', JSON.stringify(communityVerification));
+  if (communityProfile._id) {
+    VolinkStore.addNotification('admin', { icon: '\u{1F4CB}', title: 'Verifikasi komunitas diperbarui', desc: (communityProfile.name || 'Komunitas') + ' mengajukan verifikasi lanjutan', time: 'Baru saja', unread: true });
+  }
   showToast('Verifikasi berhasil dikirim! Status: Pending 📋', 'success');
   goBack();
 }
