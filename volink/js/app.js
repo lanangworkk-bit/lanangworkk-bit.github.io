@@ -560,6 +560,7 @@ function renderScreen(name) {
     case 'leaderboard': renderLeaderboard(); break;
     case 'badges': renderBadges(); break;
     case 'notifications': renderNotifications(); break;
+    case 'onboarding': renderOnboarding(); break;
     case 'community': break;
     case 'rating': break;
     case 'edit-profile': break;
