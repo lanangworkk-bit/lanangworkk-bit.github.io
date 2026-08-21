@@ -826,7 +826,8 @@ function renderCommunityProfileSettings() {
     <div class="form-group"><label class="form-label">Deskripsi</label><textarea class="form-input" id="cpDesc" rows="3">${communityProfile.description || ''}</textarea></div>
     <div class="form-group"><label class="form-label">Website / Social Media</label><input type="url" class="form-input" id="cpWebsite" value="${communityProfile.website || ''}"></div>
     <button class="btn-primary-lg" onclick="saveCommunityProfile()">Simpan Perubahan</button>
-    <button class="btn-ghost" onclick="showScreen('community-verification')" style="width:100%;margin-top:12px">📋 Verifikasi Komunitas</button>`;
+    <button class="btn-ghost" onclick="showScreen('community-verification')" style="width:100%;margin-top:12px">📋 Verifikasi Komunitas</button>
+    <button class="btn-ghost" onclick="doLogout()" style="width:100%;margin-top:12px;color:#EF4444;border-color:#FEE2E2">Keluar</button>`;
 }
 
 function saveCommunityProfile() {

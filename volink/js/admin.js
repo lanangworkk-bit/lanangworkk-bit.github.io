@@ -87,8 +87,9 @@ function doAdminLogin() {
 function doAdminLogout() {
   isAdminLoggedIn = false;
   localStorage.removeItem('volink-admin-logged');
+  localStorage.removeItem('volink-role');
   showToast('Berhasil logout', 'info');
-  showScreen('admin-login');
+  showScreen('role-selection');
 }
 
 /* -----------------------------------------------------------

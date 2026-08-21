@@ -1646,11 +1646,23 @@ function renderProfile() {
 }
 
 /* ============================================================
-   RESET
+   RESET / LOGOUT
    ============================================================ */
+function doLogout() {
+  var role = localStorage.getItem('volink-role');
+  if (role === 'admin') {
+    isAdminLoggedIn = false;
+    localStorage.removeItem('volink-admin-logged');
+  }
+  localStorage.removeItem('volink-role');
+  showToast('Berhasil logout', 'info');
+  showScreen('role-selection');
+}
+
 function resetApp() {
   localStorage.removeItem('volink-profile');
   localStorage.removeItem('volink-completed');
+  localStorage.removeItem('volink-role');
   userProfile = {
     name: 'Raka', causes: [], skills: [], skillLevels: {},
     skillLevelSingle: '', activityTypes: [], days: [],
@@ -1658,7 +1670,7 @@ function resetApp() {
   };
   joinedActivities = [];
   obStep = 0;
-  showScreen('splash');
+  showScreen('role-selection');
 }
 
 /* ============================================================
