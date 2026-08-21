@@ -495,24 +495,36 @@ function showScreen(name) {
 
   const bottomNav = document.getElementById('bottomNav');
   const communityNav = document.getElementById('communityNav');
+  const adminNav = document.getElementById('adminNav');
   const isCommunityScreen = name.startsWith('community-') && name !== 'community-signup';
   const isVolunteerScreen = MAIN_SCREENS.includes(name);
+  const isAdminScreen = name.startsWith('admin-') && name !== 'admin-login';
 
-  if (isCommunityScreen && communityNav) {
+  if (isAdminScreen && adminNav) {
+    bottomNav.style.display = 'none';
+    if (communityNav) communityNav.style.display = 'none';
+    adminNav.style.display = 'flex';
+    document.querySelectorAll('#adminNav .nav-item').forEach(n => {
+      n.classList.toggle('active', n.dataset.screen === name);
+    });
+  } else if (isCommunityScreen && communityNav) {
     bottomNav.style.display = 'none';
     communityNav.style.display = 'flex';
+    if (adminNav) adminNav.style.display = 'none';
     document.querySelectorAll('#communityNav .nav-item').forEach(n => {
       n.classList.toggle('active', n.dataset.screen === name);
     });
   } else if (isVolunteerScreen) {
     bottomNav.style.display = 'flex';
     if (communityNav) communityNav.style.display = 'none';
+    if (adminNav) adminNav.style.display = 'none';
     document.querySelectorAll('.nav-item').forEach(n => {
       n.classList.toggle('active', n.dataset.screen === name);
     });
   } else {
     bottomNav.style.display = 'none';
     if (communityNav) communityNav.style.display = 'none';
+    if (adminNav) adminNav.style.display = 'none';
   }
 
   if (name !== prev) previousScreen = prev;
@@ -567,6 +579,18 @@ function renderScreen(name) {
     case 'community-notifications': renderCommunityNotifications(); break;
     case 'community-profile': renderCommunityProfileSettings(); break;
     case 'community-verification': renderCommunityVerification(); break;
+    case 'admin-login': renderAdminLogin(); break;
+    case 'admin-home': renderAdminOverview(); break;
+    case 'admin-verification': renderAdminVerification(); break;
+    case 'admin-verif-detail': break;
+    case 'admin-opportunities': renderAdminOpportunities(); break;
+    case 'admin-opp-detail': break;
+    case 'admin-impact': renderAdminImpact(); break;
+    case 'admin-impact-detail': break;
+    case 'admin-reports': renderAdminReports(); break;
+    case 'admin-report-detail': break;
+    case 'admin-notifications': renderAdminNotifications(); break;
+    case 'admin-profile': renderAdminProfile(); break;
   }
 }
 
@@ -593,6 +617,9 @@ function skipToApp() {
     } else {
       showScreen('login');
     }
+  } else if (role === 'admin') {
+    if (isAdminLoggedIn) { showScreen('admin-home'); }
+    else showScreen('admin-login');
   } else {
     showScreen('role-selection');
   }

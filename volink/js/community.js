@@ -61,12 +61,19 @@ function selectRole(role) {
     showToast('Masuk sebagai Volunteer', 'success');
     const saved = localStorage.getItem('volink-profile');
     if (saved) { showScreen('home'); } else { showScreen('login'); }
-  } else {
+  } else if (role === 'community') {
     showToast('Masuk sebagai Community Organizer', 'success');
     if (communityProfile) {
       showScreen('community-home');
     } else {
       showScreen('community-signup');
+    }
+  } else if (role === 'admin') {
+    showToast('Masuk sebagai Admin', 'success');
+    if (isAdminLoggedIn) {
+      showScreen('admin-home');
+    } else {
+      showScreen('admin-login');
     }
   }
 }
@@ -856,5 +863,12 @@ function hideCommunityNav() {
 }
 
 function communityTabTo(screen) {
+  showScreen(screen);
+}
+
+/* -----------------------------------------------------------
+   ADMIN TAB NAV
+   ----------------------------------------------------------- */
+function adminTabTo(screen) {
   showScreen(screen);
 }
