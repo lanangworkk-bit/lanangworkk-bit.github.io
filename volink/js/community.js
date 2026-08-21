@@ -198,7 +198,7 @@ function renderCommunityDashboard() {
         </div>
         <div class="comm-opp-meta">📅 ${formatDateShort(o.date)} · 📍 ${getLocationLabel(o.location)}</div>
         <div class="comm-opp-volunteers">👥 ${o.confirmed || 0}/${o.slots} volunteer</div>
-        ${o.communityNeed ? `<div class="comm-opp-need">💚 ${o.communityNeed}</div>` : ''}
+        ${o.communityNeed ? `<div class="comm-opp-need"><img src="volink_logo.jpg" alt="VOLINK" style="width:14px;height:14px;border-radius:4px;object-fit:cover;vertical-align:middle"> ${o.communityNeed}</div>` : ''}
       </div>`).join('');
   }
 }

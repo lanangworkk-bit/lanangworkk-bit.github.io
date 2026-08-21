@@ -2586,35 +2586,61 @@ img { max-width: 100%; display: block; }
    ADMIN / TRUST & SAFETY
    ============================================================ */
 .admin-screen { height: 100%; overflow-y: auto; padding-bottom: 80px; }
+.admin-screen .comm-dash-content { padding: 0; }
 
-.admin-stat-pending { background: linear-gradient(135deg, #FEF3C7, #FDE68A); border: 1px solid #F59E0B; }
-.admin-stat-verified { background: linear-gradient(135deg, #DCFCE7, #BBF7D0); border: 1px solid var(--green); }
-.admin-stat-flagged { background: linear-gradient(135deg, #FEE2E2, #FECACA); border: 1px solid var(--red); }
+.admin-stats-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+  padding: 0 24px 16px;
+}
+.admin-stat-mini {
+  background: var(--white); border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius-sm); padding: 12px 8px; text-align: center;
+}
+.admin-stat-mini .admin-stat-num { font-size: 1.3rem; font-weight: 800; color: var(--gray-800); }
+.admin-stat-mini .admin-stat-label { font-size: 0.62rem; color: var(--gray-400); font-weight: 500; margin-top: 2px; line-height: 1.2; }
+.admin-stat-mini.admin-stat-pending { background: linear-gradient(135deg, #FEF3C7, #FDE68A); border-color: #F59E0B; }
+.admin-stat-mini.admin-stat-verified { background: linear-gradient(135deg, #DCFCE7, #BBF7D0); border-color: var(--green); }
+.admin-stat-mini.admin-stat-flagged { background: linear-gradient(135deg, #FEE2E2, #FECACA); border-color: var(--red); }
 
 .admin-filter-row { padding: 0 24px 12px; display: flex; flex-direction: column; gap: 10px; }
 .admin-search { width: 100%; padding: 10px 14px 10px 36px; border: 1.5px solid var(--gray-200); border-radius: var(--radius-sm); font-family: inherit; font-size: 0.85rem; background: var(--white) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394A39B' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E") 12px center no-repeat; }
 .admin-status-filters { display: flex; gap: 6px; flex-wrap: wrap; }
 
-.admin-attention-card { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; background: var(--white); border: 1.5px solid var(--gray-200); border-radius: var(--radius-sm); margin: 0 24px 8px; cursor: pointer; transition: var(--transition-fast); gap: 10px; }
+.admin-section-title { font-size: 0.8rem; font-weight: 700; color: var(--gray-600); text-transform: uppercase; padding: 0 24px 8px; }
+
+.admin-attention-card {
+  display: flex; align-items: stretch; padding: 12px 14px;
+  background: var(--white); border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius-sm); margin: 0 24px 8px;
+  cursor: pointer; transition: var(--transition-fast); gap: 10px;
+}
 .admin-attention-card:hover { border-color: var(--green); box-shadow: var(--shadow); }
 .admin-attention-left { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
-.admin-attention-icon { font-size: 1.6rem; flex-shrink: 0; }
-.admin-attention-title { font-size: 0.85rem; font-weight: 700; color: var(--gray-800); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.admin-attention-sub { font-size: 0.72rem; color: var(--gray-400); }
-.admin-attention-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-.admin-attention-priority { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; padding: 2px 8px; border-radius: var(--radius-full); }
+.admin-attention-icon { font-size: 1.4rem; flex-shrink: 0; width: 32px; text-align: center; }
+.admin-attention-title { font-size: 0.82rem; font-weight: 700; color: var(--gray-800); line-height: 1.2; }
+.admin-attention-sub { font-size: 0.68rem; color: var(--gray-400); margin-top: 1px; }
+.admin-attention-right {
+  display: flex; flex-direction: column; align-items: flex-end;
+  justify-content: space-between; flex-shrink: 0; gap: 4px;
+}
+.admin-attention-priority { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; padding: 1px 6px; border-radius: var(--radius-full); }
 .priority-high { background: #FEE2E2; color: #DC2626; }
 .priority-medium { background: #FEF3C7; color: #D97706; }
 .priority-low { background: #F1F5F9; color: #64748B; }
 
-.admin-list-card { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; background: var(--white); border: 1.5px solid var(--gray-200); border-radius: var(--radius-sm); margin: 0 24px 8px; cursor: pointer; transition: var(--transition-fast); gap: 10px; }
+.admin-list-card {
+  display: flex; align-items: center; padding: 12px 14px;
+  background: var(--white); border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius-sm); margin: 0 24px 8px;
+  cursor: pointer; transition: var(--transition-fast); gap: 10px;
+}
 .admin-list-card:hover { border-color: var(--green); box-shadow: var(--shadow); }
 .admin-list-left { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
-.admin-list-icon { font-size: 1.6rem; flex-shrink: 0; }
-.admin-list-title { font-size: 0.85rem; font-weight: 700; color: var(--gray-800); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.admin-list-sub { font-size: 0.72rem; color: var(--gray-400); }
+.admin-list-icon { font-size: 1.4rem; flex-shrink: 0; width: 32px; text-align: center; }
+.admin-list-title { font-size: 0.82rem; font-weight: 700; color: var(--gray-800); line-height: 1.2; }
+.admin-list-sub { font-size: 0.68rem; color: var(--gray-400); margin-top: 1px; }
 .admin-list-right { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0; }
-.admin-list-date { font-size: 0.7rem; color: var(--gray-400); }
+.admin-list-date { font-size: 0.65rem; color: var(--gray-400); }
 
 .btn-ghost-sm { font-size: 0.72rem; font-weight: 600; color: var(--green); background: transparent; border: 1.5px solid var(--gray-200); border-radius: var(--radius-full); padding: 4px 10px; cursor: pointer; transition: var(--transition-fast); font-family: inherit; }
 .btn-ghost-sm:hover { background: var(--green-light); border-color: var(--green); }

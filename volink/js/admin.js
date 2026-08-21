@@ -105,12 +105,14 @@ function renderAdminOverview() {
   document.getElementById('adminDashGreeting').textContent = getAdminGreeting();
 
   document.getElementById('adminDashStats').innerHTML = `
-    <div class="comm-stat-card admin-stat-pending"><div class="comm-stat-num">${pendingVerif}</div><div class="comm-stat-label">Pending Verification</div></div>
-    <div class="comm-stat-card admin-stat-verified"><div class="comm-stat-num">${verifiedComm}</div><div class="comm-stat-label">Verified Communities</div></div>
-    <div class="comm-stat-card admin-stat-pending"><div class="comm-stat-num">${pendingOpp}</div><div class="comm-stat-label">Pending Opportunities</div></div>
-    <div class="comm-stat-card admin-stat-pending"><div class="comm-stat-num">${pendingImpact}</div><div class="comm-stat-label">Impact Reports</div></div>
-    <div class="comm-stat-card admin-stat-flagged"><div class="comm-stat-num">${flaggedReports}</div><div class="comm-stat-label">Flagged Reports</div></div>
-    <div class="comm-stat-card admin-stat-verified"><div class="comm-stat-num">${activeComm}</div><div class="comm-stat-label">Active Communities</div></div>`;
+    <div class="admin-stats-grid">
+      <div class="admin-stat-mini admin-stat-pending"><div class="admin-stat-num">${pendingVerif}</div><div class="admin-stat-label">Pending Verifikasi</div></div>
+      <div class="admin-stat-mini admin-stat-verified"><div class="admin-stat-num">${verifiedComm}</div><div class="admin-stat-label">Terverifikasi</div></div>
+      <div class="admin-stat-mini admin-stat-pending"><div class="admin-stat-num">${pendingOpp}</div><div class="admin-stat-label">Pending Kegiatan</div></div>
+      <div class="admin-stat-mini admin-stat-pending"><div class="admin-stat-num">${pendingImpact}</div><div class="admin-stat-label">Laporan Impact</div></div>
+      <div class="admin-stat-mini admin-stat-flagged"><div class="admin-stat-num">${flaggedReports}</div><div class="admin-stat-label">Laporan Terbanyak</div></div>
+      <div class="admin-stat-mini admin-stat-verified"><div class="admin-stat-num">${activeComm}</div><div class="admin-stat-label">Komunitas Aktif</div></div>
+    </div>`;
 
   const attention = [];
   MOCK_VERIFICATIONS.filter(v => v.status === 'pending').forEach(v => attention.push({ icon: v.emoji, title: v.name, subtitle: 'Community Verification', status: 'Pending', statusType: 'pending', date: v.date, priority: v.priority, cta: 'Review', action: `reviewCommunity('${v.id}')` }));
@@ -134,7 +136,6 @@ function renderAdminOverview() {
           </div>
         </div>
         <div class="admin-attention-right">
-          <span class="comm-status-badge ${a.statusType}">${a.status}</span>
           <span class="admin-attention-priority priority-${a.priority}">${a.priority}</span>
           <button class="btn-ghost-sm" onclick="event.stopPropagation();${a.action}">${a.cta}</button>
         </div>
