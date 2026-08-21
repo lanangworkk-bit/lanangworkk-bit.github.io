@@ -813,6 +813,10 @@ function obNext() {
   }
 }
 
+function goToDashboard() {
+  showScreen('home');
+}
+
 function obBack() {
   if (obStep > 0) {
     obStep--;
@@ -1052,7 +1056,7 @@ function filterHome() {
     return;
   }
 
-  filtered.slice(0, 4).forEach(a => container.appendChild(createActivityCard(a)));
+  filtered.slice(0, 8).forEach(a => container.appendChild(createActivityCard(a)));
 }
 
 /* ============================================================
